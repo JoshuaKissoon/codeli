@@ -120,6 +120,7 @@
             {
                 return false;
             }
+
             $modules = array();
             foreach (new DirectoryIterator($dir) as $fileinfo)
             {
@@ -131,10 +132,19 @@
 
                 $modname = $fileinfo->getFilename();
                 $modpath = $dir . "$modname/";
-                if (is_dir($modpath))
+
+                if (!is_dir($modpath))
                 {
-                    $modules[$modname] = $modpath;
+                    continue;
                 }
+
+                if (file_exists($modpath . "/$modname.info.xml") || !file_exists($modpath . "/$modname.php"))
+                {
+                    continue;
+                }
+
+                /* All tests were passed, lets add this as a module */
+                $modules[$modname] = $modpath;
             }
             return $modules;
         }
@@ -148,71 +158,45 @@
          */
         public static function setupModule($modname, $modpath, $modtype)
         {
-            if (!is_dir($modpath))
-            {
-                return false;
-            }
-
-            $mod = scandir($modpath);
-            if (!file_exists($modpath . "/$modname.info.xml") || !file_exists($modpath . "/$modname.php"))
-            {
-                return false;   // Exit if no .info or .modname file exist
-            }
-            unset($mod[0]);
-            unset($mod[1]);
-
-            /* Load the module's data */
             $xmldata = new SimpleXMLElement("$modpath/$modname.info.xml", null, true);
             $modinfo = json_decode(json_encode($xmldata), TRUE);
-            if (isset($modinfo['information']['title']))
+
+            if (!isset($modinfo['information']['title']))
             {
-                /* Only add the module to the site if it has a name */
-                $module = new JModule();
-                foreach ($modinfo['information'] as $key => $value)
-                {
-                    $module->$key = $value;
-                }
-                /* Adding the permissions */
-                if (isset($modinfo['permissions']['permission']) && is_array($modinfo['permissions']['permission']))
-                {
-                    if (!isset($modinfo['permissions']['permission'][0]))
-                    {
-                        $temp = $modinfo['permissions']['permission'];
-                        unset($modinfo['permissions']['permission']);
-                        $modinfo['permissions']['permission'] = array($temp);
-                    }
-
-                    foreach ($modinfo['permissions']['permission'] as $perm)
-                    {
-                        $module->addPermission($perm['perm'], $perm['title']);
-                    }
-                }
-                /* Adding the URLs for this module */
-                if (isset($modinfo['urls']['url']) && is_array($modinfo['urls']['url']))
-                {
-                    foreach ($modinfo['urls']['url'] as $url)
-                    {
-                        $data = array();
-                        if (isset($url['permission']))
-                        {
-                            $data['permission'] = $url['permission'];
-                        }
-
-                        if (isset($url['link']))
-                        {
-                            $link = $url['link'];
-                        }
-                        else
-                        {
-                            $link = $url;
-                        }
-                        $module->addUrl($link, $data);
-                    }
-                }
-                $module->type = $modtype;
-                $module->name = $modname;
-                return $module->save();
+                return false;   // No title exists for the module, exit the setup
             }
+
+            /* Only add the module to the site if it has a name */
+            $module = new JModule();
+            foreach ($modinfo['information'] as $key => $value)
+            {
+                $module->$key = $value;
+            }
+
+            /* Adding the permissions */
+            if (isset($modinfo['permissions']['permission']) && is_array($modinfo['permissions']['permission']))
+            {
+                foreach ($modinfo['permissions']['permission'] as $perm)
+                {
+                    $module->addPermission($perm['perm'], $perm['title']);
+                }
+            }
+
+            /* Adding the URLs for this module */
+            if (isset($modinfo['urls']['url']) && is_array($modinfo['urls']['url']))
+            {
+                foreach ($modinfo['urls']['url'] as $url)
+                {
+                    $data = array();
+                    $data['permission'] = isset($url['permission']) ? $url['permission'] : "";
+                    $link = isset($url['link']) ? $url['link'] : $url;
+                    $module->addUrl($link, $data);
+                }
+            }
+
+            $module->type = $modtype;
+            $module->name = $modname;
+            return $module->save();
         }
 
         /**

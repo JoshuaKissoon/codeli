@@ -31,11 +31,10 @@
          * 
          * @return Boolean Whether the module exists or not
          */
-        public function moduleExists($modname = null)
+        public static function moduleExists($modname)
         {
             $sweia = Codeli::getInstance();
             $db = $sweia->getDB();
-            $modname = ($modname) ? $modname : $this->name;
             $res = $db->fetchObject($db->query("SELECT name FROM module WHERE name='::modname'", array("::modname" => $modname)));
 
             if (isset($res->name))
@@ -53,25 +52,25 @@
          * 
          * @return The module's data, and return this module object
          */
-        public function load($modname)
+        public function load()
         {
-            if ($this->moduleExists($modname))
-            {
-                $sweia = Codeli::getInstance();
-                $db = $sweia->getDB();
-                $mod = $db->fetchObject($db->query("SELECT * FROM module WHERE name='::modname'", array("::modname" => $modname)));
-                foreach ($mod as $key => $value)
-                {
-                    $this->$key = $value;
-                }
-                $this->loadPermissions();
-                $this->loadUrls();
-                return $this;
-            }
-            else
+            if (!self::moduleExists($this->modname))
             {
                 return false;
             }
+
+            $db = Codeli::getInstance()->getDB();
+            
+            $mod = $db->fetchObject($db->query("SELECT * FROM module WHERE name='::modname'", array("::modname" => $this->modname)));
+            foreach ($mod as $key => $value)
+            {
+                $this->$key = $value;
+            }
+            
+            $this->loadPermissions();
+            $this->loadUrls();
+            
+            return $this;
         }
 
         /**
@@ -241,17 +240,6 @@
             $values = array(
                 '::url' => $url, '::mod' => $this->name,
                 '::perm' => isset($data['permission']) ? $data['permission'] : "",
-                '::num_parts' => $num_parts,
-                '::p0' => isset($parts[0]) ? $parts[0] : $placeholder,
-                '::p1' => isset($parts[1]) ? $parts[1] : $placeholder,
-                '::p2' => isset($parts[2]) ? $parts[2] : $placeholder,
-                '::p3' => isset($parts[3]) ? $parts[3] : $placeholder,
-                '::p4' => isset($parts[4]) ? $parts[4] : $placeholder,
-                '::p5' => isset($parts[5]) ? $parts[5] : $placeholder,
-                '::p6' => isset($parts[6]) ? $parts[6] : $placeholder,
-                '::p7' => isset($parts[7]) ? $parts[7] : $placeholder,
-                '::p8' => isset($parts[8]) ? $parts[8] : $placeholder,
-                '::p9' => isset($parts[9]) ? $parts[9] : $placeholder,
             );
             $sql = "INSERT INTO url_handler (url, module, permission, num_parts, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)
                 VALUES ('::url', '::mod', '::perm', '::num_parts', '::p0', '::p1', '::p2', '::p3', '::p4', '::p5', '::p6', '::p7', '::p8', '::p9')";
