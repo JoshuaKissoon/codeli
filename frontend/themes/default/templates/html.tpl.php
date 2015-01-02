@@ -8,11 +8,13 @@
                     <?= $title; ?>
                 </title>
             <?php endif; ?>
+
         <meta charset="UTF-8">
         <meta name="HandheldFriendly" content="true" />
         <meta name="MobileOptimized" content="320" />
         <meta name="Viewport" content="width=device-width" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
         <!-- Adding Stylesheets -->
         <?php if (isset($stylesheets)): ?>
                 <?= $stylesheets; ?>

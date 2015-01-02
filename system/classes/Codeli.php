@@ -10,12 +10,13 @@
     class Codeli
     {
 
-        private static $sweia = null;
+        private static $instance = null;
 
         /* Database Object */
         private $DB;
         private $URL;
         private $themeRegistry;
+        private $theme;
         private $user;
 
         /**
@@ -26,6 +27,7 @@
             $this->DB = new SQLiDatabase();
             $this->URL = JPath::urlArgs();
             $this->themeRegistry = new ThemeRegistry();
+            $this->theme = new Theme();
         }
 
         /**
@@ -33,12 +35,12 @@
          */
         public static function getInstance()
         {
-            if (self::$sweia == null)
+            if (self::$instance == null)
             {
-                self::$sweia = new Codeli();
+                self::$instance = new Codeli();
             }
 
-            return self::$sweia;
+            return self::$instance;
         }
 
         /**
@@ -46,7 +48,7 @@
          */
         public function bootstrap()
         {
-            Theme::init();          // Initialize the theme
+            $this->theme->init();          // Initialize the theme
             Session::init();        // Initialize the session
         }
 

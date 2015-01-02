@@ -10,7 +10,7 @@
     {
 
         /** Is the site in a specific folder within your web directory */
-        const SITE_FOLDER = "lpcmis";
+        const SITE_FOLDER = "Codeli";
 
         /* Home URL */
         const HOME_URL = "home";

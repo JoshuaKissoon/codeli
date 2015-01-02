@@ -125,9 +125,25 @@
         /**
          * @return String The Path of the directory containing all themes
          */
+        public static function frontendPath()
+        {
+            return SystemConfig::basePath() . "frontend/";
+        }
+
+        /**
+         * @return String The URL of the directory containing all themes
+         */
+        public static function frontendURL()
+        {
+            return SystemConfig::baseUrl() . "frontend/";
+        }
+
+        /**
+         * @return String The Path of the directory containing all themes
+         */
         public static function themesPath()
         {
-            return SystemConfig::basePath() . "themes/";
+            return SystemConfig::frontendPath() . "themes/";
         }
 
         /**

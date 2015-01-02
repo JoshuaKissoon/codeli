@@ -1,17 +1,16 @@
-<!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-    </head>
-    <body>
-        <?php
-            // put your code here
-        ?>
-    </body>
-</html>
+<?php
+
+    /*
+     * This is the website index page that handles all requests throughout the site
+     */
+    error_reporting(E_ALL | E_WARNING | E_NOTICE);
+    ini_set('display_errors', TRUE);
+    require_once 'system/bootstrap.inc.php';
+
+
+    /**
+     * @section Render the theme after the necessary module is finished with its operations 
+     */
+    Codeli::getInstance()->getThemeRegistry()->renderPage();
+    exit;
+    

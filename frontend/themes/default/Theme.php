@@ -1,17 +1,18 @@
 <?php
 
     /**
-     * @desc A general class containing the main methods for the theming system to work with everything else
+     * A general class containing the main methods for the theming system to work with everything else
+     * 
      * @author Joshua Kissoon
-     * @date 20131202
+     * @date 20150101
      */
     class Theme implements CodeliTheme
     {
 
         /**
-         * @desc Add the theme's libraries and scripts 
+         * Add the theme's libraries and scripts 
          */
-        public static function init()
+        public function init()
         {
             $themeRegistry = Codeli::getInstance()->getThemeRegistry();
 
