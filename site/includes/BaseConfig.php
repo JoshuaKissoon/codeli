@@ -17,9 +17,9 @@
 
         /* Database Access Information */
         const DB_SERVER = "localhost";
-        const DB_USER = "lpcmis";
+        const DB_USER = "codeli";
         const DB_PASS = "Pass1233~";
-        const DB_NAME = "lpcmis";
+        const DB_NAME = "codeli";
 
         /* Themes Information */
         const THEME = "default";
