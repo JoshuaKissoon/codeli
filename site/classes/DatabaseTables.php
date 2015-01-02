@@ -8,6 +8,6 @@
      */
     class DatabaseTables extends SystemDatabaseTables
     {
-        //put your code here
+        
     }
     

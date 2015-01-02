@@ -8,6 +8,8 @@
      */
     class SystemDatabaseTables
     {
-        //put your code here
+
+        const ROUTE = "route";
+
     }
     

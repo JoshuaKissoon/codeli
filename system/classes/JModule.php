@@ -60,16 +60,16 @@
             }
 
             $db = Codeli::getInstance()->getDB();
-            
+
             $mod = $db->fetchObject($db->query("SELECT * FROM module WHERE name='::modname'", array("::modname" => $this->modname)));
             foreach ($mod as $key => $value)
             {
                 $this->$key = $value;
             }
-            
+
             $this->loadPermissions();
             $this->loadUrls();
-            
+
             return $this;
         }
 
@@ -238,11 +238,12 @@
             $sweia = Codeli::getInstance();
             $db = $sweia->getDB();
             $values = array(
-                '::url' => $url, '::mod' => $this->name,
+                '::url' => $url, 
+                '::module' => $this->name,
                 '::perm' => isset($data['permission']) ? $data['permission'] : "",
             );
-            $sql = "INSERT INTO url_handler (url, module, permission, num_parts, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)
-                VALUES ('::url', '::mod', '::perm', '::num_parts', '::p0', '::p1', '::p2', '::p3', '::p4', '::p5', '::p6', '::p7', '::p8', '::p9')";
+            $sql = "INSERT INTO " + SystemDatabaseTables::ROUTE + " (url, module, pid, callback)
+                VALUES ('::url', '::module', '::pid', '::callback')";
             $db->query($sql, $values);
         }
 
