@@ -21,10 +21,12 @@
         <url>
             <path>example</path>
             <permission>use_example</permission>
+            <callback>use_example</callback>
         </url>
         <url>
             <path>example/pager</path>
             <permission>view_example_pager</permission>
+            <callback>view_example_pager</callback>
         </url>
     </urls>
 </config>
