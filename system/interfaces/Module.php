@@ -1,12 +1,12 @@
 <?php
 
     /**
-     * Interface specifying the structure of a module's modinfo class.
+     * Interface specifying the structure of a module
      * 
-     * The modinfo class provides information about a module.
+     * This class provides information about a module.
      *
      * @author Joshua Kissoon
-     * @since 20140623
+     * @since 20150104
      */
     interface Module
     {
@@ -24,9 +24,9 @@
         /**
          * Get the set of URLs that the module handles
          * 
-         * @return Array[ModuleUrl] An array of ModuleUrls handled by the module
+         * @return Array[Route] An array of ModuleUrls handled by the module
          */
-        public function getUrls();
+        public function getRoutes();
 
         /**
          * Get the set of permissions added by this module
