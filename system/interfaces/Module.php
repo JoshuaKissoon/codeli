@@ -8,7 +8,7 @@
      * @author Joshua Kissoon
      * @since 20140623
      */
-    interface ModuleInfo
+    interface Module
     {
 
         /**
