@@ -1,34 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     
-    <information>
-        <title>User Management</title>
-        <description>Module that handles all User Management</description>
-    </information>
-    
-    <permissions>
-        <permission>
-            <perm>view_users</perm>
-            <title>View Users</title>
-        </permission>
-        <permission>
-            <perm>add_user</perm>
-            <title>Add User</title>
-        </permission>
-        <permission>
-            <perm>edit_user</perm>
-            <title>Edit User</title>
-        </permission>
-        <permission>
-            <perm>delete_user</perm>
-            <title>Delete User</title>
-        </permission>
-    </permissions>
-    
     <urls>
         <url>
-            <link>admin/user</link>
-            <permission>view_users</permission>
+            <link></link>
+            <permission></permission>
         </url>
     </urls>
 </config>
