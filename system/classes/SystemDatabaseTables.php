@@ -9,6 +9,11 @@
     class SystemDatabaseTables
     {
 
+        const USER = "user";
+        const ROLE = "role";
+        const ROLE_PERMISSION = "role_permission";
+        const PERMISSION = "permission";
+        
         const ROUTE = "route";
 
     }
