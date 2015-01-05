@@ -95,9 +95,9 @@
             /* Setup site modules */
             $site_modtype = "site";
             $site_modules = self::scanModulesDir(SiteConfig::modulesPath());
-            foreach ($site_modules as $modname => $modpath)
+            foreach ($site_modules as $modname => $data)
             {
-                if (self::setupModule($modname, $modpath, $site_modtype))
+                if (self::setupModule($modname, $site_modtype))
                 {
                     $current_modules[] = $modname;
                 }
@@ -138,13 +138,15 @@
                     continue;
                 }
 
-                if (file_exists($modpath . "/$modname.info.xml") || !file_exists($modpath . "/$modname.php"))
+                $classname = ModuleHelper::getModuleClassName($modname);
+
+                if (!file_exists("$classname.php") || !file_exists($modpath . "/$modname.php"))
                 {
                     continue;
                 }
 
                 /* All tests were passed, lets add this as a module */
-                $modules[$modname] = $modpath;
+                $modules[$modname] = array("name" => $modname);
             }
             return $modules;
         }
@@ -156,46 +158,29 @@
          * @param $modpath Where is the module located
          * @param $modtype Whether it's a site or system module
          */
-        public static function setupModule($modname, $modpath, $modtype)
+        public static function setupModule($modname, $modtype)
         {
-            $xmldata = new SimpleXMLElement("$modpath/$modname.info.xml", null, true);
-            $modinfo = json_decode(json_encode($xmldata), TRUE);
-
-            if (!isset($modinfo['information']['title']))
-            {
-                return false;   // No title exists for the module, exit the setup
-            }
+            $classname = ModuleHelper::getModuleClassName($modname);
+            $modinfo = new $classname;
 
             /* Only add the module to the site if it has a name */
             $module = new JModule();
-            foreach ($modinfo['information'] as $key => $value)
-            {
-                $module->$key = $value;
-            }
+            $module->name = $modinfo->getName();
+            $module->type = $modtype;
+            $module->description = $modinfo->getDescription();
 
             /* Adding the permissions */
-            if (isset($modinfo['permissions']['permission']) && is_array($modinfo['permissions']['permission']))
+            foreach ($modinfo->getPermissions() as $perm)
             {
-                foreach ($modinfo['permissions']['permission'] as $perm)
-                {
-                    $module->addPermission($perm['perm'], $perm['title']);
-                }
+                $module->addPermission($perm['perm'], $perm['title']);
             }
 
-            /* Adding the URLs for this module */
-            if (isset($modinfo['urls']['url']) && is_array($modinfo['urls']['url']))
+            /* Adding the Routes for this module */
+            foreach ($modinfo->getRoutes() as $route)
             {
-                foreach ($modinfo['urls']['url'] as $url)
-                {
-                    $data = array();
-                    $data['permission'] = isset($url['permission']) ? $url['permission'] : "";
-                    $link = isset($url['link']) ? $url['link'] : $url;
-                    $module->addUrl($link, $data);
-                }
+                $module->addRoute($route);
             }
 
-            $module->type = $modtype;
-            $module->name = $modname;
             return $module->save();
         }
 
