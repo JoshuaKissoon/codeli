@@ -1,0 +1,8 @@
+Codeli Todo
+- Handle system installation
+
+
+Later On
+- 
+- Allow a module to specify CSS & Script files that needs to be loaded
+- Allow a Route to have a specific file in which it's callback is stored
