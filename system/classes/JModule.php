@@ -93,7 +93,7 @@
             $sweia = Codeli::getInstance();
             $db = $sweia->getDB();
             $this->permissions = array();
-            $perms = $db->query("SELECT * FROM permission WHERE module='::modname'", array("::modname" => $this->name));
+            $perms = $db->query("SELECT * FROM " . SystemDatabaseTables::PERMISSION . " WHERE module='::modname'", array("::modname" => $this->name));
             while ($perm = $db->fetchObject($perms))
             {
                 $this->permissions[$perm->permission] = $perm->title;
