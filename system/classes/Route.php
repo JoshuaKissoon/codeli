@@ -15,7 +15,7 @@
         private $permission;    // Which permission is required to access this route
         private $httpMethod;    // What method does this route handle
 
-        public function __construct($url, $callback, $permission = "", $httpMethod = "GET")
+        public function __construct($url, $callback, $permission = "", $httpMethod = HTTP::METHOD_GET)
         {
             $this->url = $url;
             $this->callback = $callback;

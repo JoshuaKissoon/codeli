@@ -6,13 +6,16 @@
      * @author Joshua Kissoon
      * @since 20121218
      */
-    class JModule
+    class JModule implements DatabaseObject
     {
 
-        private $tbl = "module";
-        public $permissions = array();
+        private $name;
+        private $description;
+        private $type;
+        private $permissions = array();
+        private $isPermissionsLoaded = false;
         private $routes = array();
-        public $name, $description, $type;
+        private $isRoutesLoaded = false;
 
         /**
          * If the name is specified, load the module
@@ -25,14 +28,31 @@
             }
         }
 
-        /**
-         * Checks if a module already exists within the database with this name
-         * 
-         * @param $modname The name of the module
-         * 
-         * @return Boolean Whether the module exists or not
-         */
-        public static function moduleExists($modname)
+        public function getId()
+        {
+            
+        }
+        
+        public function getPermissions()
+        {
+            if(!$this->isPermissionsLoaded)
+            {
+                $this->loadPermissions();
+            }
+            
+            return $this->permissions;
+        }
+        public function getRoutes()
+        {
+            if(!$this->isRoutesLoaded)
+            {
+                $this->loadRoutes();
+            }
+            
+            return $this->routes;
+        }
+
+        public static function isExistent($modname)
         {
             $sweia = Codeli::getInstance();
             $db = $sweia->getDB();
@@ -46,13 +66,6 @@
             return false;
         }
 
-        /**
-         * Load all of a module's information if the module exists
-         * 
-         * @param $modname The name of the module to load
-         * 
-         * @return The module's data, and return this module object
-         */
         public function load()
         {
             if (!self::moduleExists($this->modname))
@@ -67,9 +80,6 @@
             {
                 $this->$key = $value;
             }
-
-            $this->loadPermissions();
-            $this->loadUrls();
 
             return $this;
         }
@@ -92,7 +102,7 @@
         /**
          * Loads an array with the URLs for this module
          */
-        private function loadUrls()
+        private function loadRoutes()
         {
             $sweia = Codeli::getInstance();
             $db = $sweia->getDB();
@@ -114,7 +124,7 @@
                 return false;
             }
 
-            if ($this->moduleExists($this->name))
+            if (self::isExistent($this->name))
             {
                 return $this->update();
             }
@@ -127,10 +137,9 @@
         /**
          * Adds a new module to the database
          */
-        private function add()
+        private function insert()
         {
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
+            $db = Codeli::getInstance()->getDB();
             $values = array(
                 "::name" => $this->name,
                 "::desc" => $this->description,
@@ -202,75 +211,15 @@
          */
         private function saveRoutes()
         {
-            foreach ($this->routes as $url => $data)
+            foreach ($this->routes as $route)
             {
-                $this->saveRoute($url, $data);
+                $route->save();
             }
         }
 
-        /**
-         * Adds a single url for a module to the database
-         * 
-         * @param $url The URL to add to the database for this module
-         * @param $data An array with data for this URL
-         */
-        private function saveRoute($url, $data)
+        public function hasMandatoryData()
         {
-            /* If the URL already exists for this module, delete it so it will be updated */
-            if ($this->urlExists($url))
-            {
-                $this->deleteUrl($url);
-            }
-
-            /* Trim the URL and get the URL parts */
-            $url = rtrim(ltrim($url, '/'), '/');
-            $parts = explode("/", $url);
-            $num_parts = ($parts[count($parts) - 1] == "%") ? 0 : count($parts);
-
-            $pos = array_search("*", $parts);
-            $placeholder = "";
-            if ($pos !== FALSE)
-            {
-                $parts[$pos] = "%";
-                $num_parts = 0;
-                $placeholder = "%";
-            }
-
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
-            $values = array(
-                '::url' => $url,
-                '::module' => $this->name,
-                '::perm' => isset($data['permission']) ? $data['permission'] : "",
-            );
-            $sql = "INSERT INTO " + SystemDatabaseTables::ROUTE + " (url, module, pid, callback)
-                VALUES ('::url', '::module', '::pid', '::callback')";
-            $db->query($sql, $values);
-        }
-
-        /**
-         * Checks if a url already exists in the database for this module
-         * 
-         * @param $url The URL to check it's existence
-         */
-        private function urlExists($url)
-        {
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
-
-            $args = array(
-                '::url' => $url,
-                '::mod' => $this->name,
-            );
-            $res = $db->fetchObject($db->query("SELECT url FROM url_handler WHERE url='::url' AND module='::mod'", $args));
-            if (isset($res->url))
-            {
-                return ($url == $res->url) ? true : false;
-            }
-            else
-            {
-                return false;
-            }
+            
         }
 
         /**
@@ -348,49 +297,12 @@
          */
         private function updateRoutes()
         {
-            /* Load the old permissions */
-            $new_urls = $this->routes;        // Save the current permissions array
             $this->loadUrls();               // Load the old permissions
-            $old_urls = $this->routes;
-            $this->routes = $new_urls;
 
-            foreach ($this->routes as $url => $data)
+            foreach ($this->routes as $route)
             {
-                /* For each new url, if the url already exists update it. Else add it to the database */
-                if (array_key_exists($url, $old_urls))
-                {
-                    $this->updateUrl($url, $data);
-                    unset($old_urls[$url]);   // Remove permission from old_perms array if it is a part of new permissions
-                }
-                else
-                {
-                    $this->saveRoute($url, $data);
-                }
+                $route->update();
             }
-
-            foreach ($old_urls as $url => $data)
-            {
-                /* Old urls array will only contain urls no longer in use, remove these urls */
-                $this->deleteUrl($url);
-            }
-        }
-
-        /**
-         * Updates a Single URL
-         */
-        private function updateUrl($url, $data)
-        {
-            $this->deleteUrl($url);
-            $this->saveRoute($url, $data);
-        }
-
-        /**
-         * Delete the specified url from url_handler database table
-         */
-        private function deleteUrl($url)
-        {
-            $db = Codeli::getInstance()->getDB();
-            return $db->query("DELETE FROM url_handler WHERE url='::url'", array("::url" => $url));
         }
 
         /**
