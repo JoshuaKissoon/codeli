@@ -6,7 +6,7 @@
      * @author Joshua Kissoon
      * @since 20140623
      */
-    class Permission
+    class Permission implements DatabaseObject
     {
 
         private $permission;
@@ -57,6 +57,51 @@
         public function getDescription()
         {
             return $this->description;
+        }
+
+        public function getId()
+        {
+            
+        }
+
+        public function hasMandatoryData()
+        {
+            
+        }
+
+        public function insert()
+        {
+            $sweia = Codeli::getInstance();
+            $db = $sweia->getDB();
+
+            $values = array(
+                '::perm' => $perm,
+                '::title' => $title,
+                '::modname' => $this->name
+            );
+            $sql = "INSERT INTO permission (permission, title, module) VALUES ('::perm', '::title', '::modname')
+                ON DUPLICATE KEY UPDATE title = '::title', module = '::modname'";
+            $db->query($sql, $values);
+        }
+
+        public function load()
+        {
+            
+        }
+
+        public function update()
+        {
+            
+        }
+
+        public static function delete($id)
+        {
+            
+        }
+
+        public static function isExistent($id)
+        {
+            
         }
 
     }
