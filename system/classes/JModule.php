@@ -126,7 +126,7 @@
             }
             else
             {
-                return $this->add();
+                return $this->insert();
             }
         }
 
@@ -142,9 +142,7 @@
             );
             $sql = "INSERT INTO $this->tbl (name, title, description, type, status) VALUES ('::name', '::title', '::desc', '::type', '::status')";
             $db->query($sql, $values);
-
-            $this->savePermissions();
-            $this->saveRoutes();
+            
             return true;
         }
 
