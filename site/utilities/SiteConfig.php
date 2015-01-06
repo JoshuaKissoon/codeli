@@ -53,65 +53,19 @@
         }
 
         /**
-         * @return String The path of the directory containing the admin theme
-         */
-        public static function adminThemePath()
-        {
-            return SystemConfig::themesPath() . BaseConfig::ADMIN_THEME . "/";
-        }
-
-        /**
-         * @return String The URL of the directory containing the admin theme
-         */
-        public static function adminThemeUrl()
-        {
-            return SystemConfig::themesUrl() . BaseConfig::ADMIN_THEME . "/";
-        }
-
-        /**
-         * @return String The path of the directory containing the site theme
-         */
-        public static function siteThemePath()
-        {
-            return SystemConfig::themesPath() . BaseConfig::THEME . "/";
-        }
-
-        /**
-         * @return String The URL of the directory containing the site theme
-         */
-        public static function siteThemeUrl()
-        {
-            return SystemConfig::themesUrl() . BaseConfig::THEME . "/";
-        }
-
-        /**
          * @return String The path of the directory containing the currently used theme for whatever section of the site the user is currently on
          */
         public static function themePath()
         {
-            if (SiteConfig::$useAdminTheme)
-            {
-                return SiteConfig::adminThemePath();
-            }
-            else
-            {
-                return SiteConfig::siteThemePath();
-            }
+            SystemConfig::frontendPath();
         }
 
         /**
          * @return String The URL of the directory containing the currently used theme for whatever section of the site the user is currently on
          */
-        public static function themeUrl()
+        public static function themeURL()
         {
-            if (SiteConfig::$useAdminTheme)
-            {
-                return SiteConfig::adminThemeUrl();
-            }
-            else
-            {
-                return SiteConfig::siteThemeUrl();
-            }
+            SystemConfig::frontendURL();
         }
 
         /**
@@ -119,7 +73,7 @@
          */
         public static function templatesPath()
         {
-            return SiteConfig::themePath() . "templates/";
+            return SystemConfig::frontendPath() . "templates/";
         }
 
         /**
@@ -127,7 +81,7 @@
          */
         public static function templatesUrl()
         {
-            return SiteConfig::themeUrl() . "templates/";
+            return SystemConfig::frontendURL() . "templates/";
         }
 
         /**
@@ -135,7 +89,7 @@
          */
         public static function themeCssUrl()
         {
-            return SiteConfig::themeUrl() . "css/";
+            return SiteConfig::themeURL() . "css/";
         }
 
         /**
@@ -143,7 +97,7 @@
          */
         public static function themeImagesUrl()
         {
-            return SiteConfig::themeUrl() . "images/";
+            return SiteConfig::themeURL() . "images/";
         }
 
         /**
@@ -151,7 +105,7 @@
          */
         public static function themeScriptsUrl()
         {
-            return SiteConfig::themeUrl() . "scripts/";
+            return SiteConfig::themeURL() . "scripts/";
         }
 
         /**
