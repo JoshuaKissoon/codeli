@@ -57,7 +57,7 @@
          */
         public static function themePath()
         {
-            SystemConfig::frontendPath();
+            return SystemConfig::frontendPath();
         }
 
         /**
@@ -65,7 +65,7 @@
          */
         public static function themeURL()
         {
-            SystemConfig::frontendURL();
+            return SystemConfig::frontendURL();
         }
 
         /**
@@ -73,7 +73,7 @@
          */
         public static function templatesPath()
         {
-            return SystemConfig::frontendPath() . "templates/";
+            return SiteConfig::themePath() . "templates/";
         }
 
         /**
@@ -81,7 +81,7 @@
          */
         public static function templatesUrl()
         {
-            return SystemConfig::frontendURL() . "templates/";
+            return SiteConfig::themeURL() . "templates/";
         }
 
         /**
