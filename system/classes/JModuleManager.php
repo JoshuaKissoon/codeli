@@ -183,8 +183,11 @@
             }
 
             /* Adding the Routes for this module */
-            foreach ($modinfo->getRoutes() as $route)
+            foreach ($modinfo->getRoutes() as $rinfo)
             {
+                $permission = new Permission($rinfo->getPermission());
+                $permission->load();
+                $route = new Route($rinfo->getURL(), $rinfo->getCallback(), $guid, $permission->getId(), $rinfo->getMethod());
                 $route->insert();
                 $module->addRoute($route);
             }

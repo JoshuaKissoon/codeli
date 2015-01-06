@@ -20,10 +20,14 @@
          * @param $permission The permission
          * @param $title The title of this permission
          */
-        public function __construct($permission, $title)
+        public function __construct($permission, $title = "")
         {
             $this->permission = $permission;
-            $this->title = $title;
+
+            if ($title)
+            {
+                $this->title = $title;
+            }
         }
 
         /**
