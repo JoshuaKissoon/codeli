@@ -16,7 +16,7 @@
          */
         public static function getModuleClassName($modname)
         {
-            return ucfirst($modname) + "Module";
+            return ucfirst($modname) . "Module";
         }
 
     }
