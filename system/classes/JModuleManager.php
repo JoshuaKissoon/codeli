@@ -84,9 +84,9 @@
             /* Setup system modules */
             $sys_modtype = "system";
             $sys_modules = self::scanModulesDir(SystemConfig::modulesPath());
-            foreach ($sys_modules as $modname => $modpath)
+            foreach ($sys_modules as $modname => $data)
             {
-                if (self::setupModule($modname, $modpath, $sys_modtype))
+                if (self::setupModule($modname, $sys_modtype))
                 {
                     $current_modules[] = $modname;
                 }
@@ -161,6 +161,10 @@
         public static function setupModule($modname, $modtype)
         {
             $classname = ModuleHelper::getModuleClassName($modname);
+            
+            /**
+             * @var Module Get an instance of the module info class
+             */
             $modinfo = new $classname;
 
             /* Only add the module to the site if it has a name */
@@ -172,12 +176,14 @@
             /* Adding the permissions */
             foreach ($modinfo->getPermissions() as $perm)
             {
-                $module->addPermission($perm['perm'], $perm['title']);
+                $perm->insert();
+                $module->addPermission($perm);
             }
 
             /* Adding the Routes for this module */
             foreach ($modinfo->getRoutes() as $route)
             {
+                $route->insert();
                 $module->addRoute($route);
             }
 
