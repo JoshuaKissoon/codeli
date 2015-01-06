@@ -30,6 +30,11 @@
             return $this->url;
         }
 
+        public function setCallback($callback)
+        {
+            $this->callback = $callback;
+        }
+        
         public function getCallback()
         {
             return $this->callback;
