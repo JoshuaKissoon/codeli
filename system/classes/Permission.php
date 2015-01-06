@@ -9,6 +9,7 @@
     class Permission implements DatabaseObject
     {
 
+        private $pid;
         private $permission;
         private $title;
         private $description;
@@ -61,7 +62,7 @@
 
         public function getId()
         {
-            
+            return $this->pid;
         }
 
         public function hasMandatoryData()
@@ -75,12 +76,12 @@
             $db = $sweia->getDB();
 
             $values = array(
-                '::perm' => $perm,
-                '::title' => $title,
-                '::modname' => $this->name
+                '::perm' => $this->permission,
+                '::title' => $this->title,
+                '::description' => $this->description
             );
-            $sql = "INSERT INTO permission (permission, title, module) VALUES ('::perm', '::title', '::modname')
-                ON DUPLICATE KEY UPDATE title = '::title', module = '::modname'";
+            $sql = "INSERT INTO permission (permission, title, module) VALUES ('::perm', '::title', '::description')
+                ON DUPLICATE KEY UPDATE title = '::title', description = '::description'";
             $db->query($sql, $values);
         }
 
