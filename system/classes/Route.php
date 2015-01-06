@@ -13,15 +13,15 @@
         private $url;   // Which URL does this route handle
         private $callback;  // Callback function for this route
         private $module;    // Which module is handling this request
-        private $permission;    // Which permission is required to access this route
+        private $pid;    // Which permission is required to access this route
         private $httpMethod;    // What method does this route handle
 
-        public function __construct($url, $callback, $module, $permission = "", $httpMethod = HTTP::METHOD_GET)
+        public function __construct($url, $callback, $module, $permission_id, $httpMethod = HTTP::METHOD_GET)
         {
             $this->url = $url;
             $this->callback = $callback;
             $this->module = $module;
-            $this->permission = $permission;
+            $this->pid = $permission_id;
             $this->httpMethod = $httpMethod;
         }
 
@@ -40,9 +40,9 @@
             return $this->module;
         }
 
-        public function getPermission()
+        public function getPermissionId()
         {
-            return $this->permission;
+            return $this->pid;
         }
 
         public function getHTTPMethod()
@@ -70,7 +70,7 @@
             {
                 return false;
             }
-            if ("" == $this->permission || null == $this->permission)
+            if ("" == $this->pid || null == $this->pid)
             {
                 return false;
             }
@@ -85,11 +85,11 @@
             $args = array(
                 '::url' => $this->url,
                 '::module' => $this->module,
-                '::permission' => $this->permission,
+                '::pid' => $this->pid,
                 '::callback' => $this->callback,
                 '::method' => $this->httpMethod,
             );
-            $sql = "INSERT INTO " . DatabaseTables::ROUTE . " (url, module, permission, callback, method) VALUES('::url', '::module', '::permission', '::callback', '::method'";
+            $sql = "INSERT INTO " . DatabaseTables::ROUTE . " (url, module, pid, callback, method) VALUES('::url', '::module', '::pid', '::callback', '::method'";
 
             $res = $db->query($sql, $args);
             if (!$res)
