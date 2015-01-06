@@ -24,7 +24,7 @@
         /**
          * Get the set of URLs that the module handles
          * 
-         * @return Array[Route] An array of ModuleUrls handled by the module
+         * @return Array[RouteInfo] An array of ModuleUrls handled by the module
          */
         public function getRoutes();
 

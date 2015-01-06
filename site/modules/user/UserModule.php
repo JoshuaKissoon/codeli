@@ -39,7 +39,7 @@
         {
             $routes = array();
 
-            $routes[] = new Route("admin/user", "user_get_users", "view_users", HTTP::METHOD_GET);
+            $routes[] = new RouteInfo("admin/user", "user_get_users", "view_users", HTTP::METHOD_GET);
 
             return $routes;
         }
