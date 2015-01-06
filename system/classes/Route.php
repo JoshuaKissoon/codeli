@@ -12,13 +12,15 @@
         private $rid;   // Unique ID for this route
         private $url;   // Which URL does this route handle
         private $callback;  // Callback function for this route
+        private $module;    // Which module is handling this request
         private $permission;    // Which permission is required to access this route
         private $httpMethod;    // What method does this route handle
 
-        public function __construct($url, $callback, $permission = "", $httpMethod = HTTP::METHOD_GET)
+        public function __construct($url, $callback, $module, $permission = "", $httpMethod = HTTP::METHOD_GET)
         {
             $this->url = $url;
             $this->callback = $callback;
+            $this->module = $module;
             $this->permission = $permission;
             $this->httpMethod = $httpMethod;
         }
@@ -31,6 +33,11 @@
         public function getCallback()
         {
             return $this->callback;
+        }
+
+        public function getModule()
+        {
+            return $this->module;
         }
 
         public function getPermission()
@@ -73,7 +80,25 @@
 
         public function insert()
         {
-            
+            $db = Codeli::getInstance()->getDB();
+
+            $args = array(
+                '::url' => $this->url,
+                '::module' => $this->module,
+                '::permission' => $this->permission,
+                '::callback' => $this->callback,
+                '::method' => $this->httpMethod,
+            );
+            $sql = "INSERT INTO " . DatabaseTables::ROUTE . " (url, module, permission, callback, method) VALUES('::url', '::module', '::permission', '::callback', '::method'";
+
+            $res = $db->query($sql, $args);
+            if (!$res)
+            {
+                return false;
+            }
+
+            $this->rid = $db->lastInsertId();
+            return true;
         }
 
         public function load()
