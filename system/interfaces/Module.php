@@ -14,7 +14,7 @@
         /**
          * @return String - The unique name for this module
          */
-        public function getName();
+        public function getTitle();
 
         /**
          * @return String - A short description of this module

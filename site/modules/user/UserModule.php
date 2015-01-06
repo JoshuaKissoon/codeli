@@ -17,7 +17,7 @@
             return $this->description;
         }
 
-        public function getName()
+        public function getTitle()
         {
             return $this->name;
         }

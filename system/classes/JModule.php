@@ -9,7 +9,8 @@
     class JModule implements DatabaseObject
     {
 
-        private $name;
+        private $guid;
+        private $title;
         private $description;
         private $type;
         private $permissions = array();
@@ -30,7 +31,42 @@
 
         public function getId()
         {
-            
+            return $this->guid;
+        }
+
+        public function setGuid($guid)
+        {
+            $this->guid = $guid;
+        }
+
+        public function setTitle($title)
+        {
+            $this->title = $title;
+        }
+
+        public function getTitle()
+        {
+            return $this->title;
+        }
+
+        public function setDescription($desc)
+        {
+            $this->description = $desc;
+        }
+
+        public function getDescription()
+        {
+            return $this->description;
+        }
+
+        public function setType($type)
+        {
+            $this->type = $type;
+        }
+
+        public function getType()
+        {
+            return $this->type;
         }
 
         public function getPermissions()
@@ -120,7 +156,7 @@
          */
         public function save()
         {
-            if (self::isExistent($this->name))
+            if (self::isExistent($this->guid))
             {
                 return $this->update();
             }
@@ -130,19 +166,19 @@
             }
         }
 
-        private function insert()
+        public function insert()
         {
             $db = Codeli::getInstance()->getDB();
             $values = array(
-                "::name" => $this->name,
+                "::guid" => $this->guid,
                 "::desc" => $this->description,
                 "::type" => $this->type,
                 "::status" => 1,
                 "::title" => $this->title,
             );
-            $sql = "INSERT INTO $this->tbl (name, title, description, type, status) VALUES ('::name', '::title', '::desc', '::type', '::status')";
+            $sql = "INSERT INTO " . DatabaseTables::MODULE . " (guid, title, description, type, status) VALUES ('::guid', '::title', '::desc', '::type', '::status')";
             $db->query($sql, $values);
-            
+
             return true;
         }
 
@@ -175,7 +211,7 @@
         /**
          * Updates a current module data in the database 
          */
-        private function update()
+        public function update()
         {
             $db = Codeli::getInstance()->getDB();
 
@@ -195,7 +231,7 @@
         /**
          * Completely delete this module and all of it's data from the database
          */
-        public function delete()
+        public static function delete($name)
         {
             if (!$this->moduleExists())
             {

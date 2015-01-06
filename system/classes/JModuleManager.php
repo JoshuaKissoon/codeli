@@ -130,23 +130,23 @@
                     continue;
                 }
 
-                $modname = $fileinfo->getFilename();
-                $modpath = $dir . "$modname/";
+                $guid = $fileinfo->getFilename();
+                $modpath = $dir . "$guid/";
 
                 if (!is_dir($modpath))
                 {
                     continue;
                 }
 
-                $classname = ModuleHelper::getModuleClassName($modname);
+                $classname = ModuleHelper::getModuleClassName($guid);
 
-                if (!file_exists("$classname.php") || !file_exists($modpath . "/$modname.php"))
+                if (!file_exists($modpath . "/$classname.php") || !file_exists($modpath . "/$guid.php"))
                 {
                     continue;
                 }
 
                 /* All tests were passed, lets add this as a module */
-                $modules[$modname] = array("name" => $modname);
+                $modules[$guid] = array("guid" => $guid);
             }
             return $modules;
         }
@@ -158,20 +158,22 @@
          * @param $modpath Where is the module located
          * @param $modtype Whether it's a site or system module
          */
-        public static function setupModule($modname, $modtype)
+        public static function setupModule($guid, $modtype)
         {
-            $classname = ModuleHelper::getModuleClassName($modname);
-            
+            $classname = ModuleHelper::getModuleClassName($guid);
+
             /**
              * @var Module Get an instance of the module info class
              */
+            require_once SystemConfig::basePath() . "$modtype/modules/$guid/$classname.php";
             $modinfo = new $classname;
 
             /* Only add the module to the site if it has a name */
             $module = new JModule();
-            $module->name = $modinfo->getName();
-            $module->type = $modtype;
-            $module->description = $modinfo->getDescription();
+            $module->setGuid($guid);
+            $module->setTitle($modinfo->getTitle());
+            $module->setType($modtype);
+            $module->setDescription($modinfo->getDescription());
 
             /* Adding the permissions */
             foreach ($modinfo->getPermissions() as $perm)
