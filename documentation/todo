@@ -6,3 +6,4 @@ Later On
 - 
 - Allow a module to specify CSS & Script files that needs to be loaded
 - Allow a Route to have a specific file in which it's callback is stored
+- Allow a module to be dependent on another module
