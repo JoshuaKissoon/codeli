@@ -33,7 +33,8 @@
             $themeRegistry->addScript(SiteConfig::themeScriptsUrl() . "main.min.js", 20);
             
             /* Our Angular JS Files */
-            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/app.js");
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/app.js", 1);
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/main_controller.js");
         }
     }
     

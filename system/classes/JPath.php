@@ -40,7 +40,7 @@
          */
         public static function getUrlQ()
         {
-            $url = $_GET['urlq'];
+            $url = isset($_GET['urlq']) ? $_GET['urlq'] : "";
             $curl = rtrim(ltrim($url, "/"), "/");
 
             if (!isset($curl) || "" == $curl)
