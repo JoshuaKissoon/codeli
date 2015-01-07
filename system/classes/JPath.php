@@ -40,13 +40,15 @@
          */
         public static function getUrlQ()
         {
-            if (!isset($_GET['urlq']))
+            $url = $_GET['urlq'];
+            $curl = rtrim(ltrim($url, "/"), "/");
+
+            if (!isset($curl) || "" == $curl)
             {
                 return BaseConfig::HOME_URL;
             }
-            $url = $_GET['urlq'];
-            $curl = rtrim(ltrim($url, "/"), "/");
-            return (isset($curl) && valid($curl)) ? $curl : BaseConfig::HOME_URL;
+
+            return $curl;
         }
 
         /**
@@ -60,46 +62,62 @@
         }
 
         /**
-         * Finds the modules that handles a URL
+         * Finds the different database Routes that handles the current URL
+         * 
+         * The different routes are computed based on the current url, where the '%' is the wildcard character.
+         * 
+         * Example: Current URL: a/b/c
+         * Possible Routes:     a/b/c
+         *                      a/b/%
+         *                      a/%/%
          * 
          * @param $url The URL for which to check
          * 
-         * @return The modules that handles this URL
+         * @return Array[Route] The different routes that handles this URL
          */
-        public static function getUrlHandlers($url = null)
+        public static function getRoutes($url = null)
         {
             if (!valid($url))
             {
                 $url = self::getUrlQ();
             }
-            if (!valid($url))
-            {
-                $url = BaseConfig::HOME_URL;
-            }
-            $url_parts = explode("/", $url);
-            $num_parts = count($url_parts);
 
-            $sql = "SELECT uh.module, uh.permission, md.status FROM url_handler uh LEFT JOIN module md ON (uh.module = md.name) WHERE (num_parts='$num_parts' OR num_parts='0') AND md.status = 1";
-            $c = 0;
-            $args = array();
-            foreach ($url_parts as $part)
+            /* Lets generate the possible route->urls that can be called for this path */
+            $url_parts = explode("/", $url);
+            $possible_urls = array($url);
+
+            for ($i = 0; $i < count($url_parts); $i++)
             {
-                $sql .= " AND (p$c = '::p$c' OR p$c = '%')";
-                $args["::p$c"] = $part;
-                $c++;
+                $temp = "";
+                for ($j = 0; $j < $i; $j++)
+                {
+                    $temp .= $url_parts[$j] . "/";
+                }
+
+                for ($k = $j; $k < count($url_parts); $k++)
+                {
+                    $temp .= "%/";
+                }
+
+                $possible_urls[] = rtrim(ltrim($temp, "/"), "/");
             }
-            $sql .= " ORDER BY num_parts DESC";
 
             $db = Codeli::getInstance()->getDB();
 
-            $rs = $db->query($sql, $args);
+            $temp2 = "'" . implode("', '", $possible_urls) . "'";
+            $sql = "SELECT * FROM " . DatabaseTables::ROUTE . " WHERE url IN ($temp2) AND method='::method'";
+            $args = array("::method" => JPath::requestMethod());
+            $results = $db->query($sql, $args);
+
             $handlers = array();
 
-            /* Store the handlers */
-            while ($handler = $db->fetchObject($rs))
+            while ($res = $db->fetchObject($results))
             {
-                $handlers[$handler->module] = array("module" => $handler->module, "permission" => $handler->permission);
+                $route = new Route();
+                $route->importData($res);
+                $handlers[] = $route;
             }
+
             return $handlers;
         }
 
@@ -128,7 +146,7 @@
                 /* Remove this URL from the menu */
                 unset($menu[$url]);
 
-                $handlers = JPath::getUrlHandlers($url);
+                $handlers = JPath::getRoutes($url);
                 foreach ($handlers as $handler)
                 {
                     if (!isset($handler['permission']) || !valid($handler['permission']))
@@ -168,12 +186,17 @@
         public static function absoluteUrl($url)
         {
             /* Replace the Base URL if it's already in the string */
-            $url = str_replace(SystemConfig::baseUrl(), "", $url);
+            $url2 = str_replace(SystemConfig::baseUrl(), "", $url);
 
             /* Remove excess slashes from the URL */
-            $url_trimmed = rtrim(ltrim($url, "/"), "/");
+            $url_trimmed = rtrim(ltrim($url2, "/"), "/");
 
             return SystemConfig::baseUrl() . "?urlq=" . ltrim($url_trimmed, "/");
+        }
+
+        public static function requestMethod()
+        {
+            return filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING);
         }
 
     }

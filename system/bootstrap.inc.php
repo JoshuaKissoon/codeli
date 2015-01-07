@@ -88,7 +88,7 @@
     /**
      * @section Load the modules for this url 
      */
-    $handlers = JPath::getUrlHandlers();
+    $handlers = JPath::getRoutes();
     foreach ($handlers as $handler)
     {
         if (!isset($handler['permission']) || !valid($handler['permission']))

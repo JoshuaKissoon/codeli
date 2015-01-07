@@ -14,15 +14,11 @@
         private $callback;  // Callback function for this route
         private $module;    // Which module is handling this request
         private $pid;    // Which permission is required to access this route
-        private $httpMethod;    // What method does this route handle
+        private $method;    // What method does this route handle
 
-        public function __construct($url, $callback, $module, $permission_id, $httpMethod = HTTP::METHOD_GET)
+        public function __construct()
         {
-            $this->url = $url;
-            $this->callback = $callback;
-            $this->module = $module;
-            $this->pid = $permission_id;
-            $this->httpMethod = $httpMethod;
+            
         }
 
         public function getURL()
@@ -34,7 +30,7 @@
         {
             $this->callback = $callback;
         }
-        
+
         public function getCallback()
         {
             return $this->callback;
@@ -52,12 +48,36 @@
 
         public function getHTTPMethod()
         {
-            return $this->httpMethod;
+            return $this->method;
+        }
+
+        public function setId($id)
+        {
+            $this->rid = $id;
         }
 
         public function getId()
         {
             return $this->rid;
+        }
+
+        public function setData($url, $callback, $module, $permission_id, $httpMethod = HTTP::METHOD_GET)
+        {
+            $this->url = $url;
+            $this->callback = $callback;
+            $this->module = $module;
+            $this->pid = $permission_id;
+            $this->method = $httpMethod;
+        }
+
+        public function importData($data)
+        {
+            $this->rid = $data->rid;
+            $this->url = $data->url;
+            $this->callback = $data->callback;
+            $this->module = $data->module;
+            $this->pid = $data->pid;
+            $this->method = $data->method;
         }
 
         public static function isExistent($id)
@@ -92,9 +112,9 @@
                 '::module' => $this->module,
                 '::pid' => $this->pid,
                 '::callback' => $this->callback,
-                '::method' => $this->httpMethod,
+                '::method' => $this->method,
             );
-            $sql = "INSERT INTO " . DatabaseTables::ROUTE . 
+            $sql = "INSERT INTO " . DatabaseTables::ROUTE .
                     " (url, module, pid, callback, method) "
                     . "VALUES('::url', '::module', '::pid', '::callback', '::method') "
                     . " ON DUPLICATE KEY UPDATE pid='::pid', callback='::callback'";
