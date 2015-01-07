@@ -17,19 +17,15 @@
             $themeRegistry = Codeli::getInstance()->getThemeRegistry();
 
             /* Adding foundation */
-            $themeRegistry->addCss(SiteConfig::themeLibrariessUrl() . "foundation/foundation-5.3.0/css/foundation.min.css");
-            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "foundation/foundation-5.3.0/js/vendor/modernizr.js", 1);
-            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "foundation/foundation-5.3.0/js/foundation.min.js");
+            $themeRegistry->addCss(SiteConfig::themeLibrariessUrl() . "bootstrap/css/bootstrap.min.css");
+            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "bootstrap/bootstrap.min.js");
 
-            /* Adding JQuery */
-            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "jquery/jquery-2.1.1.min.js", 2);
+            /* Adding Angular */
+            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "angular/angular.min.js", 2);
 
             $themeRegistry->addCss(SiteConfig::themeCssUrl() . "style.css");
             $themeRegistry->addCss(array("file" => SiteConfig::themeCssUrl() . "print.css", "media" => "print"));
-            $themeRegistry->addCss(array('file' => SiteConfig::themeCssUrl() . 'tablet.css', 'media' => 'all and (min-width: 400px) and (max-width: 900px)'));
-            $themeRegistry->addCss(array('file' => SiteConfig::themeCssUrl() . 'mobile.css', 'media' => 'all and (min-width: 0px) and (max-width: 400px)'));
-
-
+            
             $themeRegistry->addScript(SiteConfig::themeScriptsUrl() . "main.min.js", 20);
         }
 
