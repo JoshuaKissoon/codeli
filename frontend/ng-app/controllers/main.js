@@ -5,7 +5,7 @@
  */
 
 
-LPCApp.controller("MainController", ['$scope', '$http',
+CodeliApp.controller("MainController", ['$scope', '$http',
     function ($scope, $http)
     {
         $http.get("?urlq=admin/user").success(function (data)

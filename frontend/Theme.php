@@ -15,10 +15,10 @@
         public function init()
         {
             $themeRegistry = Codeli::getInstance()->getThemeRegistry();
-            
+
             /* JQuery */
             $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "jquery/jquery-2.1.1.min.js");
-            
+
             /* Adding Angular */
             $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "angular/angular.min.js", 1, true);
 
@@ -29,14 +29,15 @@
 
             $themeRegistry->addCss(SiteConfig::themeCssUrl() . "style.css");
             $themeRegistry->addCss(array("file" => SiteConfig::themeCssUrl() . "print.css", "media" => "print"));
-            
+
             $themeRegistry->addScript(SiteConfig::themeScriptsUrl() . "main.min.js", 20);
-            
+
             /* Our Angular JS Files */
-            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/Data.js", 1);
-            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/app.js", 2);
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/app.js", 1);
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/Data.js", 2);
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/main.js");
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/login.js");
         }
+
     }
     
