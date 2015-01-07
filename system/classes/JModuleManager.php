@@ -205,7 +205,10 @@
             $db = Codeli::getInstance()->getDB();
 
             $currentmods = "'" . implode("', '", $currentmods) . "'";
-            $sql = "SELECT name FROM " . JModuleManager::DB_TBL_MODULES . " WHERE name NOT IN ($currentmods)";
+            
+            $sql = "SELECT guid FROM " . JModuleManager::DB_TBL_MODULES . 
+                    " WHERE guid NOT IN ($currentmods)";
+            
             $rs = $db->query($sql);
 
             while ($modname = $db->fetchObject($rs))
