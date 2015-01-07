@@ -94,7 +94,9 @@
                 '::callback' => $this->callback,
                 '::method' => $this->httpMethod,
             );
-            $sql = "INSERT INTO " . DatabaseTables::ROUTE . " (url, module, pid, callback, method) VALUES('::url', '::module', '::pid', '::callback', '::method'";
+            $sql = "INSERT INTO " . DatabaseTables::ROUTE . 
+                    " (url, module, pid, callback, method) "
+                    . "VALUES('::url', '::module', '::pid', '::callback', '::method')";
 
             $res = $db->query($sql, $args);
             if (!$res)
