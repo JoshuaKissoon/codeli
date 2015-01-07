@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- This is the main template file for the site This template contains the overall layout and includes the main site stylesheets and scripts -->
-<html>
+<html lang="en" ng-app="LPCApp">
 
     <head>
         <?php if (isset($title)): ?>
@@ -32,10 +32,11 @@
     </head>
 
     <body class="<?php print implode(" ", JPath::urlArgs()); ?>">
-        <section id="status-messages"><?php print Theme::getFormattedScreenMessages(); ?></section>
-            <?php if (isset($content)): ?>
-                    <?php print $content; ?>
-                <?php endif; ?>
+        <section id="status-messages">
+            
+        </section>
+
+        <div ng-include src="'frontend/templates/main.html'"></div>
 
         <!--Adding Footer Scripts-->
         <?php if (isset($footer_scripts)): ?>

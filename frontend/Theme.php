@@ -15,40 +15,25 @@
         public function init()
         {
             $themeRegistry = Codeli::getInstance()->getThemeRegistry();
-
-            /* Adding foundation */
-            $themeRegistry->addCss(SiteConfig::themeLibrariessUrl() . "bootstrap/css/bootstrap.min.css");
-            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "bootstrap/bootstrap.min.js");
-
+            
+            /* JQuery */
+            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "jquery/jquery-2.1.1.min.js");
+            
             /* Adding Angular */
-            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "angular/angular.min.js", 2);
+            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "angular/angular.min.js", 1, true);
+
+            /* Adding Bootstrap */
+            $themeRegistry->addCss(SiteConfig::themeLibrariessUrl() . "bootstrap/css/bootstrap.min.css");
+            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "bootstrap/js/bootstrap.min.js");
+
 
             $themeRegistry->addCss(SiteConfig::themeCssUrl() . "style.css");
             $themeRegistry->addCss(array("file" => SiteConfig::themeCssUrl() . "print.css", "media" => "print"));
             
             $themeRegistry->addScript(SiteConfig::themeScriptsUrl() . "main.min.js", 20);
+            
+            /* Our Angular JS Files */
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/app.js");
         }
-
-        /**
-         * @desc Formats the screen messages
-         * @return The formatted screen messages
-         */
-        public static function getFormattedScreenMessages()
-        {
-            /* Get the messages from the screen messages class */
-            $messages = ScreenMessage::getMessages();
-
-            if (count($messages) < 1)
-            {
-                return false;
-            }
-
-            /* If there are messages, generate the ul */
-            $template = new Template(SiteConfig::templatesPath() . "/inner/screen-messages");
-            $template->messages = $messages;
-            $template->message_count = count($messages);
-            return $template->parse();
-        }
-
     }
     
