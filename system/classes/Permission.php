@@ -91,7 +91,19 @@
 
         public function load()
         {
-            
+            $db = Codeli::getInstance()->getDB();
+
+            $sql = "SELECT * FROM " . DatabaseTables::PERMISSION . " WHERE permission='::permission'";
+            $args = array("::permission" => $this->permission);
+            $res = $db->query($sql, $args);
+            $data = $db->fetchObject($res);
+
+            $this->pid = $data->pid;
+            $this->permission = $data->permission;
+            $this->title = $data->title;
+            $this->description = $data->description;
+
+            return true;
         }
 
         public function update()
