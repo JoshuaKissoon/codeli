@@ -5,13 +5,16 @@
  */
 
 
-CodeliApp.controller("MainController", ['$scope', '$http',
-    function ($scope, $http)
+CodeliApp.controller("MainController", ['$scope', '$http', 'Data',
+    function ($scope, $http, Data)
     {
-        $http.get("?urlq=admin/user").success(function (data)
+        for (var i = 0; i < 10; i++)
         {
-            /* Set all loaded tradebots as de-activated */
-            
-        });
+            Data.get("admin/user").then(function (result)
+            {
+                /* Set all loaded tradebots as de-activated */
+
+            });
+        }
     }
 ]);

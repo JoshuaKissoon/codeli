@@ -19,8 +19,9 @@
             /* JQuery */
             $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "jquery/jquery-2.1.1.min.js");
 
-            /* Adding Angular */
+            /* Adding Angular and it's sub-libs */
             $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "angular/angular.min.js", 1, true);
+            $themeRegistry->addScript(SiteConfig::themeLibrariessUrl() . "angular/angular-route/angular-route.min.js", 1, true);
 
             /* Adding Bootstrap */
             $themeRegistry->addCss(SiteConfig::themeLibrariessUrl() . "bootstrap/css/bootstrap.min.css");

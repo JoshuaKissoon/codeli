@@ -5,7 +5,7 @@
  */
 
 
-var CodeliApp = angular.module('CodeliApp', []);
+var CodeliApp = angular.module('CodeliApp', ["ngRoute"]);
 
 
 /**
@@ -15,14 +15,14 @@ var ANGULAR_TEMPLATES_URL = '/codeli/frontend/templates/';
 
 CodeliApp.config(['$routeProvider', function ($routeProvider)
     {
-        $routeProvider
-                .when('/dashboard', {
-                    title: 'Dashboard',
-                    templateUrl: ANGULAR_TEMPLATES_URL + 'ng-views/dashboard.html',
-                    controller: 'DashboardController'
-                })
-                .otherwise({
-                    redirectTo: '/'
-                });
+        $routeProvider.when('/dashboard', {
+            title: 'Dashboard',
+            templateUrl: ANGULAR_TEMPLATES_URL + 'ng-views/dashboard.html',
+            controller: 'DashboardController'
+        });
+
+        $routeProvider.otherwise({
+            redirectTo: '/dashboard'
+        });
     }
 ]);

@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<!-- This is the main template file for the site This template contains the overall layout and includes the main site stylesheets and scripts -->
-<html lang="en" ng-app="LPCApp">
+<html lang="en" ng-app="CodeliApp">
 
     <head>
         <?php if (isset($title)): ?>
