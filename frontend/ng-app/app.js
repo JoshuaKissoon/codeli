@@ -19,8 +19,10 @@ CodeliApp.config(['$routeProvider',
         $routeProvider.when('/dashboard', {
             templateUrl: ANGULAR_TEMPLATES_URL + 'dashboard.html',
             controller: 'DashboardController'
-        }).otherwise({
-            redirectTo: '/dashboard'
+        });
+        
+        $routeProvider.otherwise({
+            redirectTo: 'dashboard'
         });
     }
 ]);

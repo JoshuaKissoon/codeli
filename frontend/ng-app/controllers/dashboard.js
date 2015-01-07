@@ -5,7 +5,7 @@
  */
 
 
-CodeliApp.controller("MainController", ['$scope', '$http', 'Data',
+CodeliApp.controller("DashboardController", ['$scope', '$http', 'Data',
     function ($scope, $http, Data)
     {
         //for (var i = 0; i < 2; i++)

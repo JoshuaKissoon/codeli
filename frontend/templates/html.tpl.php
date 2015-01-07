@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="ng-app:CodeliApp" id="ng-app" ng-app="CodeliApp" >
+<html lang="en" ng-app="CodeliApp" >
 
     <head>
         <?php if (isset($title)): ?>
@@ -32,10 +32,12 @@
 
     <body class="<?php print implode(" ", JPath::urlArgs()); ?>">
         <section id="status-messages">
-            
+
         </section>
 
-        <div ng-include src="'frontend/templates/main.html'"></div>
+        <section id="content-wrapper" ng-view>
+        </section>
+
 
         <!--Adding Footer Scripts-->
         <?php if (isset($footer_scripts)): ?>
