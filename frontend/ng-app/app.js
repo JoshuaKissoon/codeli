@@ -5,4 +5,24 @@
  */
 
 
-var LPCApp = angular.module('LPCApp', []);
+var CodeliApp = angular.module('CodeliApp', []);
+
+
+/**
+ * Lets do some routing
+ */
+var ANGULAR_TEMPLATES_URL = '/codeli/frontend/templates/';
+
+CodeliApp.config(['$routeProvider', function ($routeProvider)
+    {
+        $routeProvider
+                .when('/dashboard', {
+                    title: 'Dashboard',
+                    templateUrl: ANGULAR_TEMPLATES_URL + 'ng-views/dashboard.html',
+                    controller: 'DashboardController'
+                })
+                .otherwise({
+                    redirectTo: '/'
+                });
+    }
+]);

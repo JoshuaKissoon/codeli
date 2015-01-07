@@ -6,7 +6,7 @@
  * @author Indrajeet Nagda
  * @since 20141204 IST
  */
-app.factory("Data", ['$http',
+CodeliApp.factory("Data", ['$http',
     function ($http) {
 
         var serviceBase = '/codeli/?urlq=/';
