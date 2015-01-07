@@ -219,13 +219,14 @@
             $db = Codeli::getInstance()->getDB();
 
             $values = array(
-                "::name" => $this->name,
+                "::guid" => $this->guid,
                 "::desc" => $this->description,
                 "::type" => $this->type,
                 "::status" => 1,
                 "::title" => $this->title,
             );
-            $sql = "UPDATE " . DatabaseTables::MODULE . " SET description = '::desc', status = '::status', type = '::type', title = '::title' WHERE name = '::name'";
+            $sql = "UPDATE " . DatabaseTables::MODULE .
+                    " SET description = '::desc', status = '::status', type = '::type', title = '::title' WHERE guid = '::guid'";
             $db->query($sql, $values);
 
             return true;
