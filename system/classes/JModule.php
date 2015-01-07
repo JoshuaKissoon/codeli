@@ -92,8 +92,8 @@
         public static function isExistent($guid)
         {
             $db = Codeli::getInstance()->getDB();
-            $res = $db->fetchObject($db->query("SELECT guid FROM " . DatabaseTables::MODULE . 
-                    " WHERE guid='::guid'", array("::guid" => $guid)));
+            $res = $db->fetchObject($db->query("SELECT guid FROM " . DatabaseTables::MODULE .
+                            " WHERE guid='::guid'", array("::guid" => $guid)));
 
             if (isset($res->guid))
             {
@@ -225,7 +225,7 @@
                 "::status" => 1,
                 "::title" => $this->title,
             );
-            $sql = "UPDATE $this->tbl SET description = '::desc', status = '::status', type = '::type', title = '::title' WHERE name = '::name'";
+            $sql = "UPDATE " . DatabaseTables::MODULE . " SET description = '::desc', status = '::status', type = '::type', title = '::title' WHERE name = '::name'";
             $db->query($sql, $values);
 
             return true;
