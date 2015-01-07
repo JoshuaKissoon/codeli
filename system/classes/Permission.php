@@ -76,8 +76,7 @@
 
         public function insert()
         {
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
+            $db = Codeli::getInstance()->getDB();
 
             $values = array(
                 '::perm' => $this->permission,
@@ -87,6 +86,7 @@
             $sql = "INSERT INTO " . DatabaseTables::PERMISSION . 
                     " (permission, title, description) VALUES ('::perm', '::title', '::description')
                 ON DUPLICATE KEY UPDATE title = '::title', description = '::description'";
+            
             $db->query($sql, $values);
         }
 

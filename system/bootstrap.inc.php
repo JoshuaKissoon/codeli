@@ -91,14 +91,16 @@
     $handlers = JPath::getRoutes();
     foreach ($handlers as $handler)
     {
-        if (!isset($handler['permission']) || !valid($handler['permission']))
+        if (!isset($handler->getPermissionId()) || !valid($handler->getPermissionId()))
         {
             /* There is no permission for this module at the current URL, just load it */
-            include_once JModuleManager::getModule($handler['module']);
+            include_once JModuleManager::getModule($handler->getModule());
         }
-        else if ($codeli->getUser()->usesPermissionSystem() && $codeli->getUser()->hasPermission($handler['permission']))
+        else if ($codeli->getUser()->usesPermissionSystem() && $codeli->getUser()->hasPermission($handler->getPermissionId()))
         {
             /* If the user has the permission to access this module for this URL, load the module */
-            include_once JModuleManager::getModule($handler['module']);
+            include_once JModuleManager::getModule($handler->getModule());
         }
+        
+        call_user_func($callback);
     }
