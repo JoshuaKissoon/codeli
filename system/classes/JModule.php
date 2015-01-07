@@ -176,7 +176,10 @@
                 "::status" => 1,
                 "::title" => $this->title,
             );
-            $sql = "INSERT INTO " . DatabaseTables::MODULE . " (guid, title, description, type, status) VALUES ('::guid', '::title', '::desc', '::type', '::status')";
+            $sql = "INSERT INTO " . DatabaseTables::MODULE . 
+                    " (guid, title, description, type, status) "
+                    . " VALUES ('::guid', '::title', '::desc', '::type', '::status') "
+                    . " ON DUPLICATE KEY UPDATE title='::title', description='::desc', status='::status'";
             $db->query($sql, $values);
 
             return true;

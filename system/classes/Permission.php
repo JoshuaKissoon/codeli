@@ -84,7 +84,8 @@
                 '::title' => $this->title,
                 '::description' => $this->description
             );
-            $sql = "INSERT INTO permission (permission, title, module) VALUES ('::perm', '::title', '::description')
+            $sql = "INSERT INTO " . DatabaseTables::PERMISSION . 
+                    " (permission, title, description) VALUES ('::perm', '::title', '::description')
                 ON DUPLICATE KEY UPDATE title = '::title', description = '::description'";
             $db->query($sql, $values);
         }
