@@ -17,7 +17,7 @@
         private $message;
         private $data;
 
-        public function __construct($status = APIResponse::STATUS_CODE_SUCCESS, $success = true, $message = "", $data = "")
+        public function __construct($data = "", $message = "", $success = true, $status = APIResponse::STATUS_CODE_SUCCESS)
         {
             $this->status = $status;
             $this->success = $success;

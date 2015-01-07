@@ -7,21 +7,36 @@
     ini_set('display_errors', TRUE);
 
     /**
-     * Setting up the headers
-     */
-    header('X-Powered-By:TechlifyInc');
-    header('Accept:application/json');
-    header('Content-Type:application/json');
-
-    /**
      * Lets bootstrap the system
      */
     require_once 'system/bootstrap.inc.php';
 
 
     /**
-     * @section Render the theme after the necessary module is finished with its operations 
+     * Render the basic theme
      */
     Codeli::getInstance()->getThemeRegistry()->renderPage();
+
+    /**
+     * @section Load the modules for this url 
+     */
+    $handlers = JPath::getRoutes();
+    foreach ($handlers as $handler)
+    {
+        if (null == $handler->getPermissionId() || "" == $handler->getPermissionId())
+        {
+            /* There is no permission for this module at the current URL, just load it */
+            include_once JModuleManager::getModule($handler->getModule());
+        }
+        //else if ($codeli->getUser()->hasPermission($handler->getPermissionId()))
+        //{
+        /* If the user has the permission to access this module for this URL, load the module */
+        include_once JModuleManager::getModule($handler->getModule());
+        //}
+
+        $response = call_user_func($handler->getCallback());
+        print $response->getJSONOutput();
+    }
+
     exit;
     
