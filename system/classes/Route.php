@@ -96,7 +96,8 @@
             );
             $sql = "INSERT INTO " . DatabaseTables::ROUTE . 
                     " (url, module, pid, callback, method) "
-                    . "VALUES('::url', '::module', '::pid', '::callback', '::method')";
+                    . "VALUES('::url', '::module', '::pid', '::callback', '::method') "
+                    . " ON DUPLICATE KEY UPDATE pid='::pid', callback='::callback'";
 
             $res = $db->query($sql, $args);
             if (!$res)
