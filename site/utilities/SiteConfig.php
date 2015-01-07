@@ -41,7 +41,7 @@
          */
         public static function librariesPath()
         {
-            return SystemConfig::basePath() . "site/libraries/";
+            return SystemConfig::basePath() . "site/libs/";
         }
 
         /**
@@ -49,7 +49,7 @@
          */
         public static function librariesUrl()
         {
-            return SystemConfig::baseUrl() . "site/libraries/";
+            return SystemConfig::baseUrl() . "site/libs/";
         }
 
         /**
@@ -113,7 +113,7 @@
          */
         public static function themeLibrariessUrl()
         {
-            return SystemConfig::themesUrl() . "libraries/";
+            return SystemConfig::themesUrl() . "libs/";
         }
 
         /**

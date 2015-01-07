@@ -143,7 +143,7 @@
          */
         public static function themesPath()
         {
-            return SystemConfig::frontendPath() . "themes/";
+            return SystemConfig::frontendPath() . "";
         }
 
         /**
@@ -151,7 +151,7 @@
          */
         public static function themesUrl()
         {
-            return SystemConfig::baseUrl() . "themes/";
+            return SystemConfig::frontendURL() . "";
         }
 
         /**
