@@ -8,7 +8,7 @@
 CodeliApp.controller("MainController", ['$scope', '$http', 'Data',
     function ($scope, $http, Data)
     {
-        for (var i = 0; i < 10; i++)
+        //for (var i = 0; i < 2; i++)
         {
             Data.get("admin/user").then(function (result)
             {

@@ -1,4 +1,5 @@
-<html lang="en" ng-app="CodeliApp">
+<!DOCTYPE html>
+<html lang="en" class="ng-app:CodeliApp" id="ng-app" ng-app="CodeliApp" >
 
     <head>
         <?php if (isset($title)): ?>
