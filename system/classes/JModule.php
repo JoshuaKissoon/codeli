@@ -89,15 +89,15 @@
             return $this->routes;
         }
 
-        public static function isExistent($modname)
+        public static function isExistent($guid)
         {
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
-            $res = $db->fetchObject($db->query("SELECT name FROM module WHERE name='::modname'", array("::modname" => $modname)));
+            $db = Codeli::getInstance()->getDB();
+            $res = $db->fetchObject($db->query("SELECT guid FROM " . DatabaseTables::MODULE . 
+                    " WHERE guid='::guid'", array("::guid" => $guid)));
 
-            if (isset($res->name))
+            if (isset($res->guid))
             {
-                return ($modname == $res->name) ? true : false;
+                return ($guid == $res->guid) ? true : false;
             }
 
             return false;
@@ -176,7 +176,7 @@
                 "::status" => 1,
                 "::title" => $this->title,
             );
-            $sql = "INSERT INTO " . DatabaseTables::MODULE . 
+            $sql = "INSERT INTO " . DatabaseTables::MODULE .
                     " (guid, title, description, type, status) "
                     . " VALUES ('::guid', '::title', '::desc', '::type', '::status') "
                     . " ON DUPLICATE KEY UPDATE title='::title', description='::desc', status='::status'";
