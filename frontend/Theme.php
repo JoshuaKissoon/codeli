@@ -35,7 +35,8 @@
             /* Our Angular JS Files */
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/Data.js", 1);
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/app.js", 2);
-            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/main_controller.js");
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/main.js");
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/login.js");
         }
     }
     
