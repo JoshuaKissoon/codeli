@@ -5,25 +5,35 @@
      * 
      * @author Joshua Kissoon
      * @since 20121227
-     * @updated 20140623
+     * @updated 20150108
      */
-    class JSmartUser implements User
+    class JUser implements User
     {
 
-        public $uid,$email, $status;
+        private $uid;
+        private $userId;
         private $password;
-        private $roles = array(), $permissions = array();
+        private $firstName;
+        private $lastName;
+        private $otherName;
+        private $usid = 1;      // Status ID
+        private $status;
+        private $email;
 
-        /* Class Metadata */
-        public static $user_type = "jsmartuser";
-        
+        /**
+         * User Roles Management
+         */
+        private $isRolesLoaded = false;
+        private $roles = array();
+
+        /* Some constants of what data is loaded */
+        private $isPermissionsLoaded = false;
+        private $permissions = array();
+
         /**
          * Error handlers 
          */
         public static $ERROR_INCOMPLETE_DATA = 00001;
-
-        /* Some constants of what data is loaded */
-        private $is_permissions_loaded = false;
 
         /**
          * Constructor method for the user class, loads the user
@@ -40,6 +50,68 @@
                 return $this->load();
             }
             return false;
+        }
+
+        public function getId()
+        {
+            return $this->uid;
+        }
+
+        public function setUserId($userId)
+        {
+            $this->userId = $userId;
+        }
+
+        public function setPassword($password)
+        {
+            $this->password = UserHelper::hashPassword($password);
+        }
+
+        public function setEmail($email)
+        {
+            $this->email = $email;
+        }
+
+        public function getEmail()
+        {
+            return $this->email;
+        }
+
+        public function setFirstName($fname)
+        {
+            $this->firstName = $fname;
+        }
+
+        public function setLastName($lname)
+        {
+            $this->lastName = $lname;
+        }
+
+        public function setOtherName($oname)
+        {
+            $this->otherName = $oname;
+        }
+
+        /**
+         * Grabs the user's status from the database
+         * 
+         * @return String - The user's current status
+         */
+        public function getStatusId()
+        {
+            return $this->usid;
+        }
+
+        /**
+         * Update this user's status
+         * 
+         * @param $usid The status id of the user's new status
+         * 
+         * @return Boolean - Whether the operation was successful
+         */
+        public function setStatusId($usid)
+        {
+            $this->usid = $usid;
         }
 
         /**
@@ -72,32 +144,7 @@
          * 
          * @return Boolean - Whether the load was successful or not
          */
-        public function load($uid = null)
-        {
-            if (!valid($this->uid) && !valid($uid))
-            {
-                /* If we have no uid to load the user by */
-                return false;
-            }
-            $this->uid = valid($this->uid) ? $this->uid : $uid;
-            if ($this->loadUserInfo())
-            {
-                $this->loadRoles();
-                $this->loadPermissions();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /**
-         * Method that loads the basic user information from the database
-         * 
-         * @return Boolean - Whether the load was successful or not
-         */
-        public function loadUserInfo()
+        public function load()
         {
             if (!valid($this->uid))
             {
@@ -124,12 +171,20 @@
         }
 
         /**
-         * Hash the password and set the user's object password. 
-         * This method does not save the password to the database.
+         * Load the user data from a given map
+         * 
+         * @param Map<String, String> $data The input data map in the form of an object
          */
-        public function setPassword($password)
+        public function loadFromMap($data)
         {
-            $this->password = $this->hashPassword($password);
+            $this->uid = $data->uid;
+            $this->userId = $data->userid;
+            $this->email = $data->email;
+            $this->usid = $data->usid;
+            $this->status = $data->status;
+            $this->firstName = $data->firstName;
+            $this->lastName = $data->lastName;
+            $this->otherName = $data->otherName;
         }
 
         /**
@@ -140,28 +195,6 @@
             return ($this->password == $this->hashPassword($password)) ? true : false;
         }
 
-        /**
-         * Saves the user's password to the database
-         * 
-         * @return Boolean - whether the save was successful
-         */
-        private function savePassword()
-        {
-            $db = Codeli::getInstance()->getDB();
-            return $db->updateFields(SystemTables::DB_TBL_USER, array("password" => $this->password), "uid='$this->uid'");
-        }
-
-        /**
-         * Hashes the user's password using a salt
-         * 
-         * @return String - The hashed password
-         */
-        private function hashPassword($password)
-        {
-            $salted = md5($password . BaseConfig::PASSWORD_SALT);
-            return sha1($salted);
-        }
-        
         /**
          * @todo
          */
@@ -185,33 +218,24 @@
             }
         }
 
-        /**
-         * Adds a new user to the system
-         */
         public function insert()
         {
-            if (self::isEmailInUse($this->email))
-            {
-                return false;
-            }
-            if (!valid($this->email) || !valid($this->password))
-            {
-                return JSmartUser::$ERROR_INCOMPLETE_DATA;
-            }
-
             $db = Codeli::getInstance()->getDB();
 
             $args = array(
-                ":email" => $this->email,
-                ":first_name" => isset($this->first_name) ? $this->first_name : "",
-                ":last_name" => isset($this->last_name) ? $this->last_name : "",
-                ":other_name" => isset($this->other_name) ? $this->other_name : "",
+                ":userid" => $this->userId,
+                ":firstName" => isset($this->firstName) ? $this->firstName : "",
+                ":email" => isset($this->email) ? $this->email : "",
+                ":lastName" => isset($this->lastName) ? $this->lastName : "",
+                ":otherName" => isset($this->otherName) ? $this->otherName : "",
                 ":dob" => isset($this->dob) ? $this->dob : "",
                 ":password" => $this->password,
+                ":usid" => $this->usid,
             );
 
-            $sql = "INSERT INTO " . SystemTables::DB_TBL_USER . " (password, email, first_name, last_name, other_name, dob)
-                VALUES(':password', ':email', ':first_name', ':last_name', ':other_name', ':dob')";
+            $sql = "INSERT INTO " . SystemTables::DB_TBL_USER .
+                    " (password, userid, email, firstName, lastName, otherName, dob, usid)
+                VALUES(':password', ':userid', ':email', ':firstName', ':lastName', ':otherName', ':dob', ':usid')";
             if ($db->query($sql, $args))
             {
                 $this->uid = $db->lastInsertId();
@@ -225,7 +249,6 @@
         }
 
         /**
-         * Updates the user data to the database
          * @todo
          */
         public function update()
@@ -242,33 +265,21 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $args = array(":email" => $this->email, "::password" => $this->password);
-            $sql = "SELECT uid FROM " . SystemTables::DB_TBL_USER . " WHERE email=':email' and password='::password' LIMIT 1";
-            $cuser = $db->fetchObject($db->query($sql, $args));
-            if (isset($cuser->uid) && valid($cuser->uid))
+            $args = array(
+                ":userid" => $this->userId,
+                "::password" => $this->password
+            );
+            $sql = "SELECT uid FROM " . SystemTables::DB_TBL_USER .
+                    " WHERE userid=':userid' and password='::password' LIMIT 1";
+
+            $result = $db->fetchObject($db->query($sql, $args));
+
+            if (isset($result->uid) && valid($result->uid))
             {
-                $this->uid = $cuser->uid;
-                $this->load();
+                $this->uid = $result->uid;
                 return true;
             }
             return false;
-        }
-
-        /**
-         * Checks if an email address is in use 
-         */
-        public static function isEmailInUse($email)
-        {
-            if (!valid($email))
-            {
-                return false;
-            }
-
-            $db = Codeli::getInstance()->getDB();
-
-            $res = $db->query("SELECT email FROM " . SystemTables::DB_TBL_USER . " WHERE email='::email'", array("::email" => $email));
-            $temp = $db->fetchObject($res);
-            return (isset($temp->email) && valid($temp->email)) ? true : false;
         }
 
         /**
@@ -287,95 +298,6 @@
 
             $db = Codeli::getInstance()->getDB();
             return $db->query("DELETE FROM " . SystemTables::DB_TBL_USER . " WHERE uid='::uid'", array("::uid" => $uid));
-        }
-
-        /**
-         * Set the user's email
-         * 
-         * @return Boolean - Whether the email was successfully set
-         */
-        public function setEmail($email)
-        {
-            if (valid($email))
-            {
-                $this->email = $email;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /**
-         * Grabs the user's status from the database
-         * 
-         * @return String - The user's current status
-         */
-        public function getStatus()
-        {
-            if (!valid($this->status))
-            {
-                /* If the status is not set in the user object, load it */
-                $db = Codeli::getInstance()->getDB();
-                $this->status = $db->getFieldValue(SystemTables::DB_TBL_USER, "status", "uid = $this->uid");
-            }
-            return $this->status;
-        }
-
-        /**
-         * Update this user's status
-         * 
-         * @param $sid The status id of the user's new status
-         * 
-         * @return Boolean - Whether the operation was successful
-         */
-        public function setStatus($sid)
-        {
-            if (!valid($sid))
-            {
-                return false;
-            }
-
-            $db = Codeli::getInstance()->getDB();
-
-            /* Check if its a valid user's status */
-            $args = array("::status" => $sid);
-            $res = $db->fetchObject($db->query("SELECT sid FROM " . SystemTables::DB_TBL_USER_STATUS . " WHERE sid='::status'", $args));
-            if (!isset($res->sid) || !valid($res->sid))
-            {
-                return false;
-            }
-
-            /* Its a valid user status, update this user's status */
-            $args['::uid'] = $this->uid;
-            return $db->query("UPDATE user SET status='::status' WHERE uid = '::uid'", $args);
-        }
-
-        /**
-         * @return Integer - The userId
-         */
-        public function getId()
-        {
-            return $this->uid;
-        }
-
-        /**
-         * @return String - the user's email
-         */
-        public function getEmail()
-        {
-            return $this->email;
-        }
-
-        /**
-         * Each user will have a system type
-         * 
-         * @return String - What type of user it is
-         */
-        public function getUserType()
-        {
-            return self::$user_type;
         }
 
         /**
@@ -429,22 +351,21 @@
          * 
          * @return Array - The set of user roles
          */
-        private function loadRoles()
+        public function loadRoles()
         {
             $db = Codeli::getInstance()->getDB();
 
-            $roles = $db->query("SELECT ur.rid, r.role FROM " . SystemTables::DB_TBL_USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'");
-            while ($role = $db->fetchObject($roles))
+            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::DB_TBL_USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'";
+            $roles = $db->query($sql);
+            while ($row = $db->fetchObject($roles))
             {
-                $this->roles[$role->rid] = $role->role;
+                $role = new Role();
+                $role->loadFromMap($row);
+                $this->roles[$row->rid] = $role;
             }
 
-            /* If the currently logged in user is this user, add the authenticated user role to this user */
-            if (Session::loggedInUid() == $this->uid)
-            {
-                $this->roles[2] = "authenticated";
-            }
-            
+            $this->isRolesLoaded = true;
+
             return $this->roles;
         }
 
@@ -453,6 +374,10 @@
          */
         public function getRoles()
         {
+            if (!$this->isRolesLoaded)
+            {
+                $this->loadRoles();
+            }
             return $this->roles;
         }
 
@@ -469,47 +394,51 @@
         /**
          * Load the permissions for this user from the database
          */
-        private function loadPermissions()
+        public function loadPermissions()
         {
-            if (count($this->roles) < 1)
-            {
-                return false;
-            }
-
             $db = Codeli::getInstance()->getDB();
 
-            $rids = implode(", ", array_keys($this->roles));
-            $rs = $db->query("SELECT permission FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid IN ($rids)");
+            $rids = implode(", ", array_keys($this->getRoles()));
+            $rs = $db->query("SELECT pid FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid IN ($rids)");
+
             while ($perm = $db->fetchObject($rs))
             {
-                $this->permissions[$perm->permission] = $perm->permission;
+                $this->permissions[$perm->pid] = $perm->pid;
             }
         }
 
         /**
          * Check if the user has the specified permission
          * 
-         * @param $permission The permission to check if the user have
+         * @param $pid The if og the permission to check if the user have
          * 
          * @return Boolean - Whether the user has the permission
          */
-        public function hasPermission($permission)
+        public function hasPermission($pid)
         {
             if ($this->uid == 1)
             {
                 return true;
             }
-            if (!valid($permission))
+            if (!valid($pid))
             {
                 return false;
             }
 
-            if (!$this->is_permissions_loaded)
+            if (!$this->isPermissionsLoaded)
             {
                 $this->loadPermissions();
             }
 
-            return (key_exists($permission, $this->permissions)) ? true : false;
+            return (key_exists($pid, $this->permissions)) ? true : false;
+        }
+
+        /**
+         * Method that returns an exposed version of the class's data
+         */
+        public function expose()
+        {
+            return get_object_vars($this);
         }
 
     }

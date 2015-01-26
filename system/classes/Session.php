@@ -30,7 +30,7 @@
          */
         public static function destroy()
         {
-            session_destroy();
+            return session_destroy();
         }
 
         /**
@@ -43,14 +43,13 @@
             session_regenerate_id(true);
             $_SESSION['uid'] = $user->getId();
             $_SESSION['logged_in'] = true;
-            $_SESSION['logged_in_email'] = $user->getEmail();
 
             /* Add the necessary data to the class */
             $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
             $_SESSION['status'] = 1;
 
             /* Now we create the necessary cookies for the user and save the session data */
-            setcookie("jsmartsid", session_id(), time() + 3600 * 300, "/");
+            setcookie("codelisid", session_id(), time() + BaseConfig::USER_SESSION_LIFETIME, "/");
 
             /* Save the entire session data to the database */
             $args = array(
@@ -61,8 +60,12 @@
                 "::data" => json_encode($_SESSION),
             );
 
-            /* Save the session data to the database */
+
             $db = Codeli::getInstance()->getDB();
+            /* Delete user session */
+            $db->query("DELETE FROM " . DatabaseTables::DB_TBL_USER_SESSION . " WHERE uid=::uid", array("::uid" => $user->getId()));
+
+            /* Save the session data to the database */
             $db->query("INSERT INTO " . SystemTables::DB_TBL_USER_SESSION . " (uid, sid, ipaddress, status, data) VALUES('::uid', '::sid', '::ipaddress', '::status', '::data')", $args);
         }
 
@@ -130,8 +133,11 @@
             unset($_SESSION['ipaddress']);
             unset($_SESSION['status']);
 
+            /* Invalidate the cookie */
+            setcookie("codelisid", session_id(), time(), "/");
+
             /* Destroy the PHP Session */
-            self::destroy();
+            return self::destroy();
         }
 
         /**

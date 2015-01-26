@@ -17,7 +17,7 @@
         private $URL;
         private $themeRegistry;
         private $theme;
-        private $user;
+        private $user = null;
 
         /**
          * Main class constructor private
@@ -91,6 +91,10 @@
          */
         public function getUser()
         {
+            if(null == $this->user)
+            {
+                $this->user = new JUser(Session::loggedInUid());
+            }
             return $this->user;
         }
 

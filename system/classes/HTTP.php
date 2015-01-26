@@ -10,6 +10,7 @@
     {
 
         const METHOD_GET = "GET";
+        const METHOD_PUT = "PUT";
         const METHOD_POST = "POST";
         const METHOD_REQUEST = "REQUEST";
         const METHOD_DELETE = "DELETE";

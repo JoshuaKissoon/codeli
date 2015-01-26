@@ -14,7 +14,7 @@
             ScreenMessage::setMessage("Please fill up all the fields", "warning");
         }
         
-        $user = new JSmartUser();
+        $user = new JUser();
         $user->username = $_POST['username'];
         $user->setPassword($_POST['password']);
         $user->first_name = $_POST['fname'];
@@ -47,9 +47,9 @@
 
                 /* Here we handle deleting a user */
                 $user = Codeli::getInstance()->getUser();
-                if ($user->hasPermission("delete_user") && JSmartUser::isExistent($_GET['uid']))
+                if ($user->hasPermission("delete_user") && JUser::isExistent($_GET['uid']))
                 {
-                    JSmartUser::delete($_GET['uid']);
+                    JUser::delete($_GET['uid']);
                 }
                 exit;
                 break;

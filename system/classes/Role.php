@@ -7,41 +7,32 @@
      * @since 20130316
      * @updated 20140623
      */
-    class Role
+    class Role implements DatabaseObject
     {
 
-        public $rid, $role, $description;
+        private $rid;
+        private $title;
+        private $description;
+
+        /* Permissions management */
         private $permissions = array();
+        private $isPermissionsLoaded = false;
 
-        /**
-         * Error handlers 
-         */
-        public static $ERROR_INCOMPLETE_DATA = 00001;
-
-        /**
-         * Role class constructor, if a role id is given, then we load the role
-         * 
-         * @param $rid The id of a role to load from the database
-         * 
-         * @return Boolean - Whether the role was successfully loaded
-         */
         public function __construct($rid = null)
         {
-            if (self::isRole($rid))
+            if (self::isExistent($rid))
             {
                 $this->rid = $rid;
                 return $this->load();
             }
         }
 
-        /**
-         * Check if a $rid is that of a valid role 
-         * 
-         * @param $rid The rid to check for
-         * 
-         * @return Boolean Whether the given rid is that of a valid role or not
-         */
-        public static function isRole($rid)
+        public function getId()
+        {
+            return $this->rid;
+        }
+
+        public static function isExistent($rid)
         {
             $db = Codeli::getInstance()->getDB();
 
@@ -50,29 +41,82 @@
             return (isset($role->rid) && valid($role->rid)) ? true : false;
         }
 
-        /**
-         * Loads all the data for a role and store it locally in this role object
-         * 
-         * @return Boolean - Whether the data was successfully loaded or not
-         */
+        public function hasMandatoryData()
+        {
+            
+        }
+
+        public function insert()
+        {
+
+            $db = Codeli::getInstance()->getDB();
+
+            $args = array(
+                '::title' => $this->title,
+                '::description' => $this->description,
+            );
+            $sql = "INSERT INTO " . SystemTables::DB_TBL_ROLE . " (title, description) VALUES ('::title', '::description')";
+
+            $res = $db->query($sql, $args);
+
+            if (!$res)
+            {
+                return false;
+            }
+
+            $this->rid = $db->lastInsertId();
+            return true;
+        }
+
+        public function update()
+        {
+            
+        }
+
         public function load()
         {
             $db = Codeli::getInstance()->getDB();
 
-            $res = $db->fetchObject($db->query("SELECT * FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid='::rid'", array("::rid" => $this->rid)));
-            if (isset($res->rid) && $res->rid == $this->rid)
-            {
-                foreach ($res as $key => $value)
-                {
-                    $this->$key = $value;
-                }
-                $this->loadPermissions();
-                return true;
-            }
-            else
+            $result = $db->query("SELECT * FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid='::rid' LIMIT 1", array("::rid" => $this->rid));
+
+            if ($db->resultNumRows() != 1)
             {
                 return false;
             }
+
+            $res = $db->fetchObject($result);
+
+            $this->loadFromMap($res);
+            return true;
+        }
+
+        public function loadFromMap($data)
+        {
+            $this->rid = $data->rid;
+            $this->title = $data->title;
+            $this->description = $data->description;
+        }
+
+        public static function delete($rid)
+        {
+            if (!self::isExistent($rid))
+            {
+                return false;
+            }
+
+            /* Remove this role from all user's and permissions and then delete all of it's data */
+            $db = Codeli::getInstance()->getDB();
+
+            $args = array("::rid" => $rid);
+            if ($db->query("DELETE FROM " . SystemTables::DB_TBL_USER_ROLE . " WHERE rid = '::rid'", $args))
+            {
+                $db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid = '::rid'", $args);
+                if ($db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid = '::rid'", $args))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
@@ -97,114 +141,40 @@
         }
 
         /**
-         * Removes all permissions from this role 
-         */
-        public function clearPermissions()
-        {
-            $this->permissions = array();
-        }
-
-        /**
          * Load all permissions for this role from the database
          * 
          * @return Integer - The number of permissions that are associated with this role
          */
-        private function loadPermissions()
+        public function loadPermissions()
         {
             $db = Codeli::getInstance()->getDB();
 
-            $res = $db->query("SELECT permission FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid = '::rid'", array("::rid" => $this->rid));
+            $sql = "SELECT rp.pid, p.* FROM " . SystemTables::DB_TBL_ROLE_PERMISSION .
+                    " rp LEFT JOIN " . DatabaseTables::PERMISSION . " p ON (rp.pid = p.pid) WHERE rid = '::rid'";
+            $res = $db->query($sql, array("::rid" => $this->rid));
+
             while ($perm = $db->fetchObject($res))
             {
-                $this->permissions[$perm->permission] = $perm->permission;
+                $permission = new Permission();
+                $permission->loadFromMap($perm);
+                $this->permissions[$permission->getId()] = $permission;
             }
+
+            $this->isPermissionsLoaded = true;
             return count($this->permissions);
         }
 
         /**
-         * Updates the permissions for this role by adding, editing and deleting permissions as necessary
-         * 
-         * @return Boolean - Whether the operation was successful or not
+         * @return Array[Permission]
          */
-        public function savePermissions()
+        public function getPermissions()
         {
-            /* First we delete all the permissions that are there in the database */
-            $db = Codeli::getInstance()->getDB();
-
-            $res = $db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid='::rid'", array("::rid" => $this->rid));
-
-            if (!$res)
+            if (!$this->isPermissionsLoaded)
             {
-                return false;
+                $this->loadPermissions();
             }
 
-            /* Add the permissions that are currently here */
-            foreach ($this->permissions as $perm)
-            {
-                $args = array(
-                    '::rid' => $this->rid,
-                    '::permission' => $perm,
-                );
-                return $db->query("INSERT INTO " . SystemTables::DB_TBL_ROLE_PERMISSION . " (rid, permission) VALUES ('::rid', '::permission')", $args);
-            }
-        }
-
-        /**
-         * Either update a role if we're using a current role or create a new role
-         * 
-         * @return Boolean - Whether the operation was successful or not
-         */
-        public function save()
-        {
-            if (isset($this->rid) && self::isRole($this->rid))
-            {
-                return $this->update();
-            }
-            else
-            {
-                return $this->create();
-            }
-        }
-
-        /**
-         * Here we update a role to the database from the current role object
-         * 
-         * @return Boolean - Whether the update was successful or not
-         */
-        private function update()
-        {
-            return $this->savePermissions();
-        }
-
-        /**
-         * Add a new role to the database
-         * 
-         * @return Whether the creation of the role was successful or not
-         */
-        private function create()
-        {
-            if (!isset($this->role) || !valid($this->role))
-            {
-                return self::$ERROR_INCOMPLETE_DATA;
-            }
-
-            $db = Codeli::getInstance()->getDB();
-
-            $args = array(
-                '::role' => $this->role,
-                '::description' => $this->description,
-            );
-            $sql = "INSERT INTO " . SystemTables::DB_TBL_ROLE . " (role, description) VALUES ('::role', '::description')";
-            if ($db->query($sql, $args))
-            {
-                $this->rid = $db->lastInsertId();
-                $this->savePermissions();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return $this->permissions;
         }
 
         /**
@@ -220,32 +190,20 @@
         }
 
         /**
-         * Delete this role from the system 
-         * 
-         * @param $rid The role to delete
-         * 
-         * @return Boolean - Whether the deletion was successful or not
+         * Method that returns an exposed version of the class's data
          */
-        public static function delete($rid)
+        public function expose()
         {
-            if (!self::isRole($rid))
+            $obj = clone $this;
+            
+            $obj->permissions = array();
+            
+            foreach($this->getPermissions() as $perm)
             {
-                return false;
+                $obj->permissions[] = $perm->expose();
             }
-
-            /* Remove this role from all user's and permissions and then delete all of it's data */
-            $db = Codeli::getInstance()->getDB();
-
-            $args = array("::rid" => $rid);
-            if ($db->query("DELETE FROM " . SystemTables::DB_TBL_USER_ROLE . " WHERE rid = '::rid'", $args))
-            {
-                $db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid = '::rid'", $args);
-                if ($db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid = '::rid'", $args))
-                {
-                    return true;
-                }
-            }
-            return false;
+            
+            return get_object_vars($obj);
         }
 
     }

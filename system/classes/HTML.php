@@ -31,7 +31,7 @@
              * And check if media variable is actually set
              */
             $file = isset($stylesheet['file']) ? $stylesheet['file'] : (isset($stylesheet['href']) ? $stylesheet['href'] : "");
-            $media = isset($stylesheet['media']) ? $stylesheet['media'] : "screen, projection";
+            $media = isset($stylesheet['media']) ? $stylesheet['media'] : "all";
             $tag = "<link href='$file' rel='stylesheet' type='text/css' media='$media'>";
             return $tag;
         }

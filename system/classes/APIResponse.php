@@ -30,7 +30,7 @@
             $this->status = $status;
         }
 
-        public function setSuccess(boolean $success)
+        public function setSuccess($success)
         {
             $this->success = $success;
         }

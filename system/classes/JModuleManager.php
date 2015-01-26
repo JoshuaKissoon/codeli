@@ -26,7 +26,7 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $temp = $db->fetchObject($db->query("SELECT type FROM module WHERE name = '::mod'", array("::mod" => $modname)));
+            $temp = $db->fetchObject($db->query("SELECT type FROM module WHERE guid = '::mod'", array("::mod" => $modname)));
             if (isset($temp->type) && $temp->type == "system")
             {
                 return SystemConfig::modulesPath() . "$modname/";
@@ -46,7 +46,7 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $temp = $db->fetchObject($db->query("SELECT type FROM module WHERE name = '::mod'", array("::mod" => $modname)));
+            $temp = $db->fetchObject($db->query("SELECT type FROM module WHERE guid = '::mod'", array("::mod" => $modname)));
             if (isset($temp->type) && $temp->type == "system")
             {
                 $path = SystemConfig::modulesUrl() . "$modname/";
@@ -176,10 +176,21 @@
             $module->setDescription($modinfo->getDescription());
 
             /* Adding the permissions */
-            foreach ($modinfo->getPermissions() as $perm)
+            foreach ($modinfo->getPermissions() as $perm_info)
             {
-                $perm->insert();
-                $module->addPermission($perm);
+                if (Permission::isExistent($perm_info->getPermission()))
+                {
+                    $permission = new Permission($perm_info->getPermission());
+            }
+                else
+                {
+                    $permission = new Permission();
+                    $permission->setPermission($perm_info->getPermission());
+                    $permission->setTitle($perm_info->getTitle());
+                    $permission->setDescription($perm_info->getDescription());
+                    $permission->insert();
+                }
+                $module->addPermission($permission);
             }
 
             /* Adding the Routes for this module */
@@ -187,7 +198,8 @@
             {
                 $permission = new Permission($rinfo->getPermission());
                 $permission->load();
-                $route = new Route($rinfo->getURL(), $rinfo->getCallback(), $guid, $permission->getId(), $rinfo->getMethod());
+                $route = new Route();
+                $route->setData($rinfo->getURL(), $rinfo->getCallback(), $guid, $permission->getId(), $rinfo->getMethod());
                 $route->insert();
                 $module->addRoute($route);
             }

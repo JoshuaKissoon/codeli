@@ -9,7 +9,7 @@
     class Permission implements DatabaseObject
     {
 
-        private $pid;
+        private $pid = 0;
         private $permission;
         private $title;
         private $description;
@@ -20,14 +20,23 @@
          * @param $permission The permission
          * @param $title The title of this permission
          */
-        public function __construct($permission, $title = "")
+        public function __construct($permission = null)
         {
-            $this->permission = $permission;
-
-            if ($title)
+            if (null != $permission)
             {
-                $this->title = $title;
+                $this->permission = $permission;
+                $this->load();
             }
+        }
+
+        public function getId()
+        {
+            return $this->pid;
+        }
+
+        public function setPermission($val)
+        {
+            $this->permission = $val;
         }
 
         /**
@@ -36,6 +45,11 @@
         public function getPermission()
         {
             return $this->permission;
+        }
+
+        public function setTitle($val)
+        {
+            $this->title = $val;
         }
 
         /**
@@ -64,11 +78,6 @@
             return $this->description;
         }
 
-        public function getId()
-        {
-            return $this->pid;
-        }
-
         public function hasMandatoryData()
         {
             
@@ -83,28 +92,46 @@
                 '::title' => $this->title,
                 '::description' => $this->description
             );
-            $sql = "INSERT INTO " . DatabaseTables::PERMISSION . 
+            $sql = "INSERT INTO " . DatabaseTables::PERMISSION .
                     " (permission, title, description) VALUES ('::perm', '::title', '::description')
                 ON DUPLICATE KEY UPDATE title = '::title', description = '::description'";
-            
-            $db->query($sql, $values);
+
+            $res = $db->query($sql, $values);
+
+            if (!$res)
+            {
+                return false;
+            }
+
+            $this->pid = $db->lastInsertId();
+            return true;
         }
 
         public function load()
         {
+            if (null == $this->permission || "" == $this->permission)
+            {
+                return false;
+            }
+
             $db = Codeli::getInstance()->getDB();
 
-            $sql = "SELECT * FROM " . DatabaseTables::PERMISSION . " WHERE permission='::permission'";
+            $sql = "SELECT * FROM " . DatabaseTables::PERMISSION . " WHERE permission='::permission' LIMIT 1";
             $args = array("::permission" => $this->permission);
             $res = $db->query($sql, $args);
             $data = $db->fetchObject($res);
 
+            $this->loadFromMap($data);
+
+            return true;
+        }
+
+        public function loadFromMap($data)
+        {
             $this->pid = $data->pid;
             $this->permission = $data->permission;
             $this->title = $data->title;
             $this->description = $data->description;
-
-            return true;
         }
 
         public function update()
@@ -117,9 +144,39 @@
             
         }
 
-        public static function isExistent($id)
+        public static function isExistent($perm = "", $pid = "")
         {
-            
+            $db = Codeli::getInstance()->getDB();
+
+            $sql = "SELECT * FROM " . DatabaseTables::PERMISSION;
+            if ("" === $pid)
+            {
+                $sql .= " WHERE permission='::permission' LIMIT 1";
+                $args = array("::permission" => $perm);
+            }
+            else
+            {
+                $sql .= " WHERE pid='::pid' LIMIT 1";
+                $args = array("::pid" => $pid);
+            }
+
+            $res = $db->query($sql, $args);
+
+            return ($db->resultNumRows($res) == 1);
+        }
+
+        /**
+         * Method that returns an exposed version of the class's data
+         */
+        public function expose()
+        {
+            return get_object_vars($this);
+        }
+
+        public function __toString()
+        {
+            $obj = $this;
+            return $this->expose();
         }
 
     }

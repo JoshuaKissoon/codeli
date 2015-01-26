@@ -66,14 +66,25 @@
          * 
          * The different routes are computed based on the current url, where the '%' is the wildcard character.
          * 
-         * Example: Current URL: a/b/c
-         * Possible Routes:     a/b/c
-         *                      a/b/%
-         *                      a/%/%
+         * Example: Current URL: a/b/c/d  
+         * Possible Routes      Bit Representation
+         * 
+         *      a/b/c/d             1111=15
+         *      a/b/c/%             1110=14
+         *      a/b/%/d             1101=13
+         *      a/b/%/%             1100=12
+         *      a/%/c/d             1011=11
+         *      a/%/c/%             1010=10
+         *      a/%/%/d             1001=9
+         *      a/%/%/%             1000=8
+         * 
+         * We can see that we can generate all possible routes by using a byte representation of the last n-1 bits
          * 
          * @param $url The URL for which to check
          * 
          * @return Array[Route] The different routes that handles this URL
+         * 
+         * @throws InvalidRouteException
          */
         public static function getRoutes($url = null)
         {
@@ -82,43 +93,62 @@
                 $url = self::getUrlQ();
             }
 
+            /* Try to get a handler for the main URL */
+            $res = JPath::getHandler($url, JPath::requestMethod());
+            if ($res)
+            {
+                return $res;
+            }
+
             /* Lets generate the possible route->urls that can be called for this path */
-            $url_parts = explode("/", $url);
-            $possible_urls = array($url);
+            $clean_url = ltrim(rtrim($url, "/"), "/");
+            $url_parts = explode("/", $clean_url);
 
-            for ($i = 0; $i < count($url_parts); $i++)
+            $sublength = count($url_parts) - 1;
+            $max_val = pow(2, $sublength);
+
+            for ($i = 1; $i <= $max_val; $i++)
             {
-                $temp = "";
-                for ($j = 0; $j < $i; $j++)
+                $val = $max_val - $i;
+
+                $bit_rep = sprintf("%0" . $sublength . "d", decbin($val));
+
+                $url = $url_parts[0] . "/";
+                for ($j = 0; $j < $sublength; $j++)
                 {
-                    $temp .= $url_parts[$j] . "/";
+                    $url .= $bit_rep[$j] == 1 ? $url_parts[$j + 1] : "%";
+                    $url .= "/";
                 }
 
-                for ($k = $j; $k < count($url_parts); $k++)
-                {
-                    $temp .= "%/";
-                }
+                $url = JPath::cleanURL($url);
 
-                $possible_urls[] = rtrim(ltrim($temp, "/"), "/");
+                /* Lets check if we have a handler for this URL */
+                $res = JPath::getHandler($url, JPath::requestMethod());
+                if ($res)
+                {
+                    return $res;
+                }
             }
 
+            /* We've found no handler, lets throw an invalid route exception */
+            throw new InvalidRouteException("No Route handler was found for the given route");
+        }
+
+        private static function getHandler($url, $method)
+        {
             $db = Codeli::getInstance()->getDB();
+            $sql = "SELECT * FROM " . DatabaseTables::ROUTE . " WHERE url='::url' AND method='::method' LIMIT 1";
+            $args = array("::method" => $method, '::url' => $url);
+            $res = $db->query($sql, $args);
 
-            $temp2 = "'" . implode("', '", $possible_urls) . "'";
-            $sql = "SELECT * FROM " . DatabaseTables::ROUTE . " WHERE url IN ($temp2) AND method='::method'";
-            $args = array("::method" => JPath::requestMethod());
-            $results = $db->query($sql, $args);
-
-            $handlers = array();
-
-            while ($res = $db->fetchObject($results))
+            if ($db->resultNumRows() == 1)
             {
+                $data = $db->fetchObject($res);
                 $route = new Route();
-                $route->importData($res);
-                $handlers[] = $route;
+                $route->importData($data);
+                return $route;
             }
-
-            return $handlers;
+            return false;
         }
 
         /**
@@ -197,6 +227,11 @@
         public static function requestMethod()
         {
             return filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING);
+        }
+
+        public static function cleanURL($url)
+        {
+            return rtrim(ltrim($url, "/"), "/");
         }
 
     }
