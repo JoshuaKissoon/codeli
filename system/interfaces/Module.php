@@ -31,7 +31,7 @@
         /**
          * Get the set of permissions added by this module
          * 
-         * @return Array[Permission] An array of Permission handled by this module
+         * @return Array[PermissionInfo] An array of Permission handled by this module
          */
         public function getPermissions();
     }
