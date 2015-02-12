@@ -1,0 +1,9 @@
+About the module dependency feature
+
+This feature allows a module to set that it is dependent on other modules
+
+Runtime working:
+1. Load Module
+2. If module has dependencies
+3. Foreach (dependencies as dependency)
+    Load Dependency Module
