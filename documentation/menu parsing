@@ -1,0 +1,19 @@
+Algorithm used for menu parsing
+Input: A HashMap<String url, Array data> of menu's
+Output: A HashMap<String url, Array data> of menu's the currently logged in user can access
+
+v0.1 
+Improvement: Retrieve all routes in one database request and store them locally in an array indexed by the URL
+
+Complexity: n + 1 + n= 2n
+
+
+v0.0 - Basic
+1. Foreach(menu as url => data)
+2. Retrieve Route from Database
+3. If user does not have Route.permission
+    3.1. Remove this URL from the set of menu's
+
+Complexity: n + n + n = 3n
+
+Boundary Case: If no route exist in the DB for a URL - remove it from the menu
