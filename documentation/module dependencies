@@ -4,6 +4,25 @@ This feature allows a module to set that it is dependent on other modules
 
 Runtime working:
 1. Load Module
-2. If module has dependencies
+2. If module has dependencies, get the list of them
 3. Foreach (dependencies as dependency)
     Load Dependency Module
+
+
+Getting the list of a module dependencies
+- Criteria: Dependencies need to be in order which to load
+
+- Use a recursive function for this and add a priority
+
+=> Variables
+    - L: list of all current dependencies
+
+function addDependencies(&L, ModuleName)
+1. Get the list l of dependencies for the current module
+2. If every member of l is already in L, exit
+3. Foreach dependency d in l
+    3.1. If d is in L, continue
+    3.2. If d is not in L
+        3.2.1. Add d to L
+        3.2.2. call addDependencies(d)
+    
