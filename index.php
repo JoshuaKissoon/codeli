@@ -13,7 +13,7 @@
 
 
     $url = Codeli::getInstance()->getURL();
-    
+
     if (BaseConfig::HOME_URL == trim($url[0]))
     {
         /**
@@ -30,23 +30,47 @@
         /**
          * @section Load the modules for this url 
          */
-        $handlers = JPath::getRoute();
-        foreach ($handlers as $handler)
+        try
         {
-            if (null == $handler->getPermissionId() || "" == $handler->getPermissionId())
-            {
-                /* There is no permission for this module at the current URL, just load it */
-                include_once JModuleManager::getModule($handler->getModule());
-            }
-            //else if ($codeli->getUser()->hasPermission($handler->getPermissionId()))
-            //{
-            /* If the user has the permission to access this module for this URL, load the module */
-            include_once JModuleManager::getModule($handler->getModule());
-            //}
-
-            $response = call_user_func($handler->getCallback());
-            print $response->getJSONOutput();
+            $handler = JPath::getRoute();
         }
+        catch (InvalidRouteException $ex)
+        {
+            $response = new APIResponse("", "System Error Occured", false);
+            print $response->getJSONOutput();
+            exit;
+        }
+
+        /* Check if the user can access this path */
+        $user = Codeli::getInstance()->getUser();
+        $access = false;
+
+        /* There is no permission for this module at the current URL, just load it */
+        if (null == $handler->getPermissionId() || "" == $handler->getPermissionId() || "0" == $handler->getPermissionId())
+        {
+            $access = true;
+        }
+        else if ($user->hasPermission($handler->getPermissionId()))
+        {
+            $access = true;
+        }
+
+        if (false == $access)
+        {
+            $response = new APIResponse("", "No permission access.", false);
+            print $response->getJSONOutput();
+            exit;
+        }
+
+        /* User has full access, lets load all active modules */
+        $modules = JModuleManager::getActiveModules();
+        foreach ($modules as $module)
+        {
+            include_once JModuleManager::getModule($module->getId());
+        }
+
+        $response = call_user_func($handler->getCallback());
+        print $response->getJSONOutput();
+        exit;
     }
-    exit;
     

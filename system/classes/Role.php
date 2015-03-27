@@ -32,11 +32,26 @@
             return $this->rid;
         }
 
+        public function setTitle($var)
+        {
+            $this->title = $var;
+        }
+
+        public function getTitle()
+        {
+            return $this->title;
+        }
+
+        public function setDescription($var)
+        {
+            $this->description = $var;
+        }
+
         public static function isExistent($rid)
         {
             $db = Codeli::getInstance()->getDB();
 
-            $res = $db->query("SELECT rid FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid = '::rid'", array("::rid" => $rid));
+            $res = $db->query("SELECT rid FROM " . SystemTables::ROLE . " WHERE rid = '::rid'", array("::rid" => $rid));
             $role = $db->fetchObject($res);
             return (isset($role->rid) && valid($role->rid)) ? true : false;
         }
@@ -48,14 +63,13 @@
 
         public function insert()
         {
-
             $db = Codeli::getInstance()->getDB();
 
             $args = array(
                 '::title' => $this->title,
                 '::description' => $this->description,
             );
-            $sql = "INSERT INTO " . SystemTables::DB_TBL_ROLE . " (title, description) VALUES ('::title', '::description')";
+            $sql = "INSERT INTO " . SystemTables::ROLE . " (title, description) VALUES ('::title', '::description')";
 
             $res = $db->query($sql, $args);
 
@@ -70,14 +84,23 @@
 
         public function update()
         {
-            
+            $db = Codeli::getInstance()->getDB();
+
+            $args = array(
+                '::rid' => $this->rid,
+                '::title' => $this->title,
+                '::description' => $this->description,
+            );
+            $sql = "UPDATE " . SystemTables::ROLE . " SET title='::title', description='::description' WHERE rid=::rid LIMIT 1";
+
+            return $db->query($sql, $args);
         }
 
         public function load()
         {
             $db = Codeli::getInstance()->getDB();
 
-            $result = $db->query("SELECT * FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid='::rid' LIMIT 1", array("::rid" => $this->rid));
+            $result = $db->query("SELECT * FROM " . SystemTables::ROLE . " WHERE rid='::rid' LIMIT 1", array("::rid" => $this->rid));
 
             if ($db->resultNumRows() != 1)
             {
@@ -108,10 +131,10 @@
             $db = Codeli::getInstance()->getDB();
 
             $args = array("::rid" => $rid);
-            if ($db->query("DELETE FROM " . SystemTables::DB_TBL_USER_ROLE . " WHERE rid = '::rid'", $args))
+            if ($db->query("DELETE FROM " . SystemTables::USER_ROLE . " WHERE rid = '::rid'", $args))
             {
-                $db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid = '::rid'", $args);
-                if ($db->query("DELETE FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid = '::rid'", $args))
+                $db->query("DELETE FROM " . SystemTables::ROLE_PERMISSION . " WHERE rid = '::rid'", $args);
+                if ($db->query("DELETE FROM " . SystemTables::ROLE . " WHERE rid = '::rid'", $args))
                 {
                     return true;
                 }
@@ -149,8 +172,8 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $sql = "SELECT rp.pid, p.* FROM " . SystemTables::DB_TBL_ROLE_PERMISSION .
-                    " rp LEFT JOIN " . DatabaseTables::PERMISSION . " p ON (rp.pid = p.pid) WHERE rid = '::rid'";
+            $sql = "SELECT rp.permission, p.* FROM " . SystemTables::ROLE_PERMISSION .
+                    " rp LEFT JOIN " . DatabaseTables::PERMISSION . " p ON (rp.permission = p.permission) WHERE rid = '::rid'";
             $res = $db->query($sql, array("::rid" => $this->rid));
 
             while ($perm = $db->fetchObject($res))
@@ -195,14 +218,14 @@
         public function expose()
         {
             $obj = clone $this;
-            
+
             $obj->permissions = array();
-            
-            foreach($this->getPermissions() as $perm)
+
+            foreach ($this->getPermissions() as $perm)
             {
                 $obj->permissions[] = $perm->expose();
             }
-            
+
             return get_object_vars($obj);
         }
 

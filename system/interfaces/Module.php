@@ -34,5 +34,12 @@
          * @return Array[PermissionInfo] An array of Permission handled by this module
          */
         public function getPermissions();
+
+        /**
+         * Get the set of dependencies for a module
+         * 
+         * @return Array[String] An array of Module names that this module is dependent on
+         */
+        public function getDependencies();
     }
     

@@ -20,7 +20,7 @@
 
             $db = Codeli::getInstance()->getDB();
 
-            $res = $db->query("SELECT email FROM " . SystemTables::DB_TBL_USER . " WHERE email='::email'", array("::email" => $email));
+            $res = $db->query("SELECT email FROM " . SystemTables::USER . " WHERE email='::email'", array("::email" => $email));
             $temp = $db->fetchObject($res);
             return (isset($temp->email) && valid($temp->email)) ? true : false;
         }

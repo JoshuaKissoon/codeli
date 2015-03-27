@@ -9,16 +9,15 @@
     class Permission implements DatabaseObject
     {
 
-        private $pid = 0;
         private $permission;
         private $title;
         private $description;
+        private $module;
 
         /**
          * Create a new permission instance
          * 
          * @param $permission The permission
-         * @param $title The title of this permission
          */
         public function __construct($permission = null)
         {
@@ -31,7 +30,7 @@
 
         public function getId()
         {
-            return $this->pid;
+            return $this->permission;
         }
 
         public function setPermission($val)
@@ -78,6 +77,19 @@
             return $this->description;
         }
 
+        public function setModule($val)
+        {
+            $this->module = $val;
+        }
+
+        /**
+         * @return String - The title of this permission
+         */
+        public function getModule()
+        {
+            return $this->module;
+        }
+
         public function hasMandatoryData()
         {
             
@@ -90,11 +102,12 @@
             $values = array(
                 '::perm' => $this->permission,
                 '::title' => $this->title,
-                '::description' => $this->description
+                '::description' => $this->description,
+                '::module' => $this->module,
             );
             $sql = "INSERT INTO " . DatabaseTables::PERMISSION .
-                    " (permission, title, description) VALUES ('::perm', '::title', '::description')
-                ON DUPLICATE KEY UPDATE title = '::title', description = '::description'";
+                    " (permission, title, description, module) VALUES ('::perm', '::title', '::description', '::module')
+                ON DUPLICATE KEY UPDATE title = '::title', description = '::description', module='::module'";
 
             $res = $db->query($sql, $values);
 
@@ -103,7 +116,6 @@
                 return false;
             }
 
-            $this->pid = $db->lastInsertId();
             return true;
         }
 
@@ -128,15 +140,50 @@
 
         public function loadFromMap($data)
         {
-            $this->pid = $data->pid;
+            if ($data->permission == "")
+            {
+                print $this->permission;
+                exit;
+            }
             $this->permission = $data->permission;
             $this->title = $data->title;
             $this->description = $data->description;
+            $this->module = $data->module;
         }
 
         public function update()
         {
-            
+            $db = Codeli::getInstance()->getDB();
+
+            $values = array(
+                '::perm' => $this->permission,
+                '::title' => $this->title,
+                '::description' => $this->description,
+                '::module' => $this->module,
+            );
+            $sql = "UPDATE " . DatabaseTables::PERMISSION .
+                    " SET title = '::title', description = '::description', module='::module' WHERE permission='::perm' LIMIT 1";
+
+            $res = $db->query($sql, $values);
+
+            if (!$res)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public function save()
+        {
+            if (self::isExistent($this->permission))
+            {
+                $this->update();
+            }
+            else
+            {
+                $this->insert();
+            }
         }
 
         public static function delete($id)
@@ -144,21 +191,13 @@
             
         }
 
-        public static function isExistent($perm = "", $pid = "")
+        public static function isExistent($permission)
         {
             $db = Codeli::getInstance()->getDB();
 
             $sql = "SELECT * FROM " . DatabaseTables::PERMISSION;
-            if ("" === $pid)
-            {
-                $sql .= " WHERE permission='::permission' LIMIT 1";
-                $args = array("::permission" => $perm);
-            }
-            else
-            {
-                $sql .= " WHERE pid='::pid' LIMIT 1";
-                $args = array("::pid" => $pid);
-            }
+            $sql .= " WHERE permission='::permission' LIMIT 1";
+            $args = array("::permission" => $permission);
 
             $res = $db->query($sql, $args);
 
@@ -175,7 +214,6 @@
 
         public function __toString()
         {
-            $obj = $this;
             return $this->expose();
         }
 
