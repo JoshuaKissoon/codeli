@@ -17,16 +17,23 @@
         private $isPermissionsLoaded = false;
         private $routes = array();
         private $isRoutesLoaded = false;
+        private $dependencies = array();
+        private $isDependenciesLoaded = false;
 
         /**
-         * If the name is specified, load the module
+         * If the guid is specified, load the module
+         * 
+         * @param String $guid The module's GUID
          */
-        public function __construct($modname = null)
+        public function __construct($guid = null)
         {
-            if ($modname)
+            if (null == $guid)
             {
-                $this->load($modname);
+                return;
             }
+
+            $this->guid = $guid;
+            $this->load();
         }
 
         public function getId()
@@ -73,7 +80,15 @@
         {
             if (!$this->isPermissionsLoaded)
             {
-                $this->loadPermissions();
+                $sweia = Codeli::getInstance();
+                $db = $sweia->getDB();
+                $this->permissions = array();
+                $perms = $db->query("SELECT * FROM " . SystemDatabaseTables::PERMISSION . " WHERE module='::modname'", array("::modname" => $this->name));
+                while ($perm = $db->fetchObject($perms))
+                {
+                    $this->permissions[$perm->permission] = $perm->title;
+                }
+                $this->isPermissionsLoaded = true;
             }
 
             return $this->permissions;
@@ -83,10 +98,43 @@
         {
             if (!$this->isRoutesLoaded)
             {
-                $this->loadRoutes();
+                $sweia = Codeli::getInstance();
+                $db = $sweia->getDB();
+                $this->routes = array();
+                $urls = $db->query("SELECT * FROM url_handler WHERE module='::modname'", array("::modname" => $this->name));
+                while ($url = $db->fetchObject($urls))
+                {
+                    $this->routes[$url->url] = $url;
+                }
+
+                $this->isRoutesLoaded = true;
             }
 
             return $this->routes;
+        }
+
+        /**
+         * Get the set of dependencies for this module
+         */
+        public function getDependencies()
+        {
+            if (!$this->isDependenciesLoaded)
+            {
+                $db = Codeli::getInstance()->getDB();
+
+                $this->dependencies = array();
+
+                $results = $db->query("SELECT * FROM " . SystemTables::MODULE_DEPENDENCY . " WHERE guid='::guid'", array("::guid" => $this->guid));
+
+                while ($res = $db->fetchObject($results))
+                {
+                    $this->dependencies[$res->dependencyGuid] = $res;
+                }
+
+                $this->isDependenciesLoaded = true;
+            }
+
+            return $this->dependencies;
         }
 
         public static function isExistent($guid)
@@ -105,50 +153,15 @@
 
         public function load()
         {
-            if (!self::moduleExists($this->modname))
-            {
-                return false;
-            }
-
             $db = Codeli::getInstance()->getDB();
 
-            $mod = $db->fetchObject($db->query("SELECT * FROM module WHERE name='::modname'", array("::modname" => $this->modname)));
+            $mod = $db->fetchObject($db->query("SELECT * FROM module WHERE guid='::guid'", array("::guid" => $this->guid)));
             foreach ($mod as $key => $value)
             {
                 $this->$key = $value;
             }
 
             return $this;
-        }
-
-        /**
-         * Loads an array with the permissions for this module
-         */
-        private function loadPermissions()
-        {
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
-            $this->permissions = array();
-            $perms = $db->query("SELECT * FROM " . SystemDatabaseTables::PERMISSION . " WHERE module='::modname'", array("::modname" => $this->name));
-            while ($perm = $db->fetchObject($perms))
-            {
-                $this->permissions[$perm->permission] = $perm->title;
-            }
-        }
-
-        /**
-         * Loads an array with the URLs for this module
-         */
-        private function loadRoutes()
-        {
-            $sweia = Codeli::getInstance();
-            $db = $sweia->getDB();
-            $this->routes = array();
-            $urls = $db->query("SELECT * FROM url_handler WHERE module='::modname'", array("::modname" => $this->name));
-            while ($url = $db->fetchObject($urls))
-            {
-                $this->routes[$url->url] = $url;
-            }
         }
 
         /**
@@ -180,9 +193,35 @@
                     " (guid, title, description, type, status) "
                     . " VALUES ('::guid', '::title', '::desc', '::type', '::status') "
                     . " ON DUPLICATE KEY UPDATE title='::title', description='::desc', status='::status'";
+
             $db->query($sql, $values);
 
+            $this->updateDependencies();
+
             return true;
+        }
+
+        /**
+         * Delete all dependencies in the system and re-add them
+         */
+        public function updateDependencies()
+        {
+            $db = Codeli::getInstance()->getDB();
+            $db->query("DELETE FROM " . SystemTables::MODULE_DEPENDENCY . " WHERE guid='::guid'", array("::guid" => $this->guid));
+
+            if (count($this->dependencies) < 1)
+            {
+                return;
+            }
+
+            $values = array();
+            foreach ($this->dependencies as $dep => $data)
+            {
+                $values[] = " ('$this->guid', '$dep') ";
+            }
+
+            $sql = "INSERT INTO " . SystemTables::MODULE_DEPENDENCY . " (guid, dependencyGuid) VALUES " . implode(",", $values);
+            return $db->query($sql);
         }
 
         /**
@@ -204,6 +243,17 @@
         public function addRoute(Route $route)
         {
             $this->routes[$route->getURL()] = $route;
+        }
+
+        /**
+         * Adds a permurlission to this module's urls array, this is not yet saved to the DB
+         * 
+         * @param $url
+         * @param $data
+         */
+        public function addDependency($dependency)
+        {
+            $this->dependencies[$dependency] = array("dependencyGuid" => $dependency);
         }
 
         public function hasMandatoryData()
@@ -229,35 +279,34 @@
                     " SET description = '::desc', status = '::status', type = '::type', title = '::title' WHERE guid = '::guid'";
             $db->query($sql, $values);
 
+            $this->updateDependencies();
+
             return true;
         }
 
         /**
          * Completely delete this module and all of it's data from the database
          */
-        public static function delete($name)
+        public static function delete($guid)
         {
-            if (!$this->moduleExists())
+            if (!self::isExistent($guid))
             {
                 return false;
             }
 
             $db = Codeli::getInstance()->getDB();
 
-            /* Delete the URLs and Permissions associated with this module */
-            $rs = $db->query("SELECT url FROM url_handler WHERE module='::mod'", array("::mod" => $this->name));
-            while ($url = $db->fetchObject($rs))
-            {
-                $this->deleteUrl($url->url);
-            }
-            $rs2 = $db->query("SELECT * FROM permission WHERE module='::mod'", array("::mod" => $this->name));
-            while ($perm = $db->fetchObject($rs2))
-            {
-                $this->deletePermission($perm->permission);
-            }
+            /* Delete the Routes associated with this module */
+            $db->query("DELETE FROM route WHERE module='::guid'", array("::guid" => $this->guid));
+
+            /* Delete the Permissions associated with this module */
+            $db->query("DELETE FROM permission WHERE module='::guid'", array("::guid" => $this->guid));
+
+            /* Delete the Module Dependencies associated with this module */
+            $db->query("DELETE FROM " . SystemTables::MODULE_DEPENDENCY . " WHERE guid='::guid'", array("::guid" => $this->guid));
 
             /* Delete the module data */
-            return $db->query("DELETE FROM module WHERE name='::mod'", array("::mod" => $this->name));
+            return $db->query("DELETE FROM " . SystemTables::MODULE . " WHERE guid='::guid'", array("::guid" => $this->guid));
         }
 
     }

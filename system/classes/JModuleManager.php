@@ -9,14 +9,14 @@
     class JModuleManager
     {
 
-        const DB_TBL_MODULES = "module";
-
         /**
          * Load the main module handler file for this module: modulename.php
+         * 
+         * @param String $guid The GUID of the module to load
          */
-        public static function getModule($modname)
+        public static function getModule($guid)
         {
-            return self::getModulePath($modname) . "$modname.php";
+            return self::getModulePath($guid) . "$guid.php";
         }
 
         /**
@@ -178,18 +178,12 @@
             /* Adding the permissions */
             foreach ($modinfo->getPermissions() as $perm_info)
             {
-                if (Permission::isExistent($perm_info->getPermission()))
-                {
-                    $permission = new Permission($perm_info->getPermission());
-            }
-                else
-                {
-                    $permission = new Permission();
-                    $permission->setPermission($perm_info->getPermission());
-                    $permission->setTitle($perm_info->getTitle());
-                    $permission->setDescription($perm_info->getDescription());
-                    $permission->insert();
-                }
+                $permission = new Permission();
+                $permission->setPermission($perm_info->getPermission());
+                $permission->setTitle($perm_info->getTitle());
+                $permission->setDescription($perm_info->getDescription());
+                $permission->setModule($module->getId());
+                $permission->save();
                 $module->addPermission($permission);
             }
 
@@ -202,6 +196,14 @@
                 $route->setData($rinfo->getURL(), $rinfo->getCallback(), $guid, $permission->getId(), $rinfo->getMethod());
                 $route->insert();
                 $module->addRoute($route);
+            }
+
+            if (count($modinfo->getDependencies()) > 0)
+            {
+                foreach ($modinfo->getDependencies() as $dependency)
+                {
+                    $module->addDependency($dependency);
+                }
             }
 
             return $module->save();
@@ -217,10 +219,10 @@
             $db = Codeli::getInstance()->getDB();
 
             $currentmods = "'" . implode("', '", $currentmods) . "'";
-            
-            $sql = "SELECT guid FROM " . JModuleManager::DB_TBL_MODULES . 
+
+            $sql = "SELECT guid FROM " . SystemTables::MODULE .
                     " WHERE guid NOT IN ($currentmods)";
-            
+
             $rs = $db->query($sql);
 
             while ($modname = $db->fetchObject($rs))
@@ -229,6 +231,29 @@
                 $mod = new JModule($modname->name);
                 $mod->delete();
             }
+        }
+
+        /**
+         * Get the list of all active modules in the system
+         * 
+         * @return Array[JModule]
+         */
+        public static function getActiveModules()
+        {
+            $db = Codeli::getInstance()->getDB();
+
+            $sql = "SELECT guid FROM " . SystemTables::MODULE .
+                    " WHERE status=1";
+
+            $rs = $db->query($sql);
+
+            $modules = array();
+            while ($modname = $db->fetchObject($rs))
+            {
+                $modules[] = new JModule($modname->guid);
+            }
+
+            return $modules;
         }
 
     }
