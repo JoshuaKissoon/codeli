@@ -38,6 +38,10 @@
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/Data.js", 2);
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/main.js");
             $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/login.js");
+            
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/user/user.js");
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/user/rbac.js");
+            $themeRegistry->addScript(SystemConfig::frontendURL() . "ng-app/controllers/user/role.js");
         }
 
     }
