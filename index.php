@@ -30,7 +30,7 @@
         /**
          * @section Load the modules for this url 
          */
-        $handlers = JPath::getRoutes();
+        $handlers = JPath::getRoute();
         foreach ($handlers as $handler)
         {
             if (null == $handler->getPermissionId() || "" == $handler->getPermissionId())

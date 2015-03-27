@@ -44,12 +44,12 @@
          */
         public function __construct($uid = null)
         {
-            if (isset($uid) && self::isExistent($uid))
+            if (null == $uid)
             {
-                $this->uid = $uid;
-                return $this->load();
+                return false;
             }
-            return false;
+            $this->uid = $uid;
+            return $this->load();
         }
 
         public function getId()
@@ -131,10 +131,11 @@
             $db = Codeli::getInstance()->getDB();
 
             $args = array("::uid" => $uid);
-            $sql = "SELECT uid FROM " . SystemTables::DB_TBL_USER . " WHERE uid='::uid'";
+            $sql = "SELECT uid FROM " . SystemTables::USER . " WHERE uid='::uid'";
             $res = $db->query($sql, $args);
             $user = $db->fetchObject($res);
-            return (isset($user->uid) && valid($user->uid)) ? true : false;
+
+            return (isset($user->uid) && valid($user->uid));
         }
 
         /**
@@ -146,28 +147,19 @@
          */
         public function load()
         {
-            if (!valid($this->uid))
-            {
-                return false;
-            }
             $db = Codeli::getInstance()->getDB();
 
             $args = array(":uid" => $this->uid);
-            $sql = "SELECT * FROM " . SystemTables::DB_TBL_USER . " u WHERE uid=':uid' LIMIT 1";
+            $sql = "SELECT * FROM " . SystemTables::USER_V . " WHERE uid=':uid' LIMIT 1";
             $rs = $db->query($sql, $args);
-            $cuser = $db->fetchObject($rs);
-            if (isset($cuser->uid) && valid($cuser->uid))
-            {
-                foreach ($cuser as $key => $value)
-                {
-                    $this->$key = $value;
-                }
-                return true;
-            }
-            else
+
+            if ($db->resultNumRows($rs) != 1)
             {
                 return false;
             }
+
+            $data = $db->fetchObject($rs);
+            return $this->loadFromMap($data);
         }
 
         /**
@@ -233,27 +225,50 @@
                 ":usid" => $this->usid,
             );
 
-            $sql = "INSERT INTO " . SystemTables::DB_TBL_USER .
+            $sql = "INSERT INTO " . SystemTables::USER .
                     " (password, userid, email, firstName, lastName, otherName, dob, usid)
                 VALUES(':password', ':userid', ':email', ':firstName', ':lastName', ':otherName', ':dob', ':usid')";
-            if ($db->query($sql, $args))
-            {
-                $this->uid = $db->lastInsertId();
-                $this->saveRoles();
-                return true;
-            }
-            else
+
+            $res = $db->query($sql, $args);
+
+            if (!$res)
             {
                 return false;
             }
+
+            $this->uid = $db->lastInsertId();
+            $this->saveRoles();
+            return true;
         }
 
-        /**
-         * @todo
-         */
         public function update()
         {
-            
+            $db = Codeli::getInstance()->getDB();
+
+            $args = array(
+                ":userid" => $this->userId,
+                ":firstName" => isset($this->firstName) ? $this->firstName : "",
+                ":email" => isset($this->email) ? $this->email : "",
+                ":lastName" => isset($this->lastName) ? $this->lastName : "",
+                ":otherName" => isset($this->otherName) ? $this->otherName : "",
+                ":dob" => isset($this->dob) ? $this->dob : "",
+                ":password" => $this->password,
+                ":usid" => $this->usid,
+                ":uid" => $this->uid,
+            );
+
+            $sql = "UPDATE " . SystemTables::USER .
+                    " SET password=':password', userid=':userid', email=':email', firstName=':firstName', 
+                        lastName=':lastName', otherName=':otherName', dob=':dob', usid=':usid' WHERE uid=:uid LIMIT 1";
+
+            $res = $db->query($sql, $args);
+
+            if (!$res)
+            {
+                return false;
+            }
+
+            return $this->saveRoles();
         }
 
         /**
@@ -269,7 +284,7 @@
                 ":userid" => $this->userId,
                 "::password" => $this->password
             );
-            $sql = "SELECT uid FROM " . SystemTables::DB_TBL_USER .
+            $sql = "SELECT uid FROM " . SystemTables::USER .
                     " WHERE userid=':userid' and password='::password' LIMIT 1";
 
             $result = $db->fetchObject($db->query($sql, $args));
@@ -297,7 +312,7 @@
             }
 
             $db = Codeli::getInstance()->getDB();
-            return $db->query("DELETE FROM " . SystemTables::DB_TBL_USER . " WHERE uid='::uid'", array("::uid" => $uid));
+            return $db->query("DELETE FROM " . SystemTables::USER . " WHERE uid='::uid'", array("::uid" => $uid));
         }
 
         /**
@@ -311,14 +326,15 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $res = $db->query("SELECT role FROM " . SystemTables::DB_TBL_ROLE . " WHERE rid='::rid'", array('::rid' => $rid));
-            $role = $db->fetchObject($res);
-            if (isset($role->role) && valid($role->role))
+            $res = $db->query("SELECT * FROM " . SystemTables::ROLE . " WHERE rid='::rid'", array('::rid' => $rid));
+
+            if ($db->resultNumRows($res) != 1)
             {
-                $this->roles[$rid] = $role->role;
-                return true;
+                return false;
             }
-            return false;
+
+            $this->roles[$rid] = new Role($rid);
+            return true;
         }
 
         /**
@@ -336,11 +352,13 @@
             $db = Codeli::getInstance()->getDB();
 
             /* Remove all the roles this user had */
-            $db->query("DELETE FROM " . SystemTables::DB_TBL_USER_ROLE . " WHERE uid='$this->uid'");
+            $db->query("DELETE FROM " . SystemTables::USER_ROLE . " WHERE uid='$this->uid'");
 
-            foreach ((array) $this->roles as $rid => $role)
+            foreach ($this->roles as $rid => $role)
             {
-                $db->query("INSERT INTO " . SystemTables::DB_TBL_USER_ROLE . " (uid, rid) VALUES ('::uid', '::rid')", array('::rid' => $rid, '::uid' => $this->uid));
+                $sql = "INSERT INTO " . SystemTables::USER_ROLE . " (uid, rid) VALUES ('::uid', '::rid')";
+                $args = array('::rid' => $rid, '::uid' => $this->uid);
+                $db->query($sql, $args, true);
             }
 
             return true;
@@ -355,7 +373,7 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::DB_TBL_USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'";
+            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'";
             $roles = $db->query($sql);
             while ($row = $db->fetchObject($roles))
             {
@@ -396,31 +414,37 @@
          */
         public function loadPermissions()
         {
+            if (count($this->getRoles()) < 1)
+            {
+                $this->permissions = array();
+                return;
+            }
+
             $db = Codeli::getInstance()->getDB();
 
             $rids = implode(", ", array_keys($this->getRoles()));
-            $rs = $db->query("SELECT pid FROM " . SystemTables::DB_TBL_ROLE_PERMISSION . " WHERE rid IN ($rids)");
+            $rs = $db->query("SELECT permission FROM " . SystemTables::ROLE_PERMISSION . " WHERE rid IN ($rids)");
 
             while ($perm = $db->fetchObject($rs))
             {
-                $this->permissions[$perm->pid] = $perm->pid;
+                $this->permissions[$perm->permission] = $perm->permission;
             }
         }
 
         /**
          * Check if the user has the specified permission
          * 
-         * @param $pid The if og the permission to check if the user have
+         * @param $permission The id of the permission to check if the user have
          * 
          * @return Boolean - Whether the user has the permission
          */
-        public function hasPermission($pid)
+        public function hasPermission($permission)
         {
             if ($this->uid == 1)
             {
                 return true;
             }
-            if (!valid($pid))
+            if (!valid($permission))
             {
                 return false;
             }
@@ -430,7 +454,7 @@
                 $this->loadPermissions();
             }
 
-            return (key_exists($pid, $this->permissions)) ? true : false;
+            return (key_exists($permission, $this->permissions)) ? true : false;
         }
 
         /**
@@ -438,7 +462,15 @@
          */
         public function expose()
         {
-            return get_object_vars($this);
+            $object = get_object_vars($this);
+            $object['roles'] = array();
+
+            foreach ($this->roles as $role)
+            {
+                $object['roles'][$role->getId()] = $role->expose();
+            }
+
+            return $object;
         }
 
     }

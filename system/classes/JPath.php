@@ -82,11 +82,11 @@
          * 
          * @param $url The URL for which to check
          * 
-         * @return Array[Route] The different routes that handles this URL
+         * @return Route The route that handles this URL
          * 
          * @throws InvalidRouteException
          */
-        public static function getRoutes($url = null)
+        public static function getRoute($url = null)
         {
             if (!valid($url))
             {
@@ -176,7 +176,7 @@
                 /* Remove this URL from the menu */
                 unset($menu[$url]);
 
-                $handlers = JPath::getRoutes($url);
+                $handlers = JPath::getRoute($url);
                 foreach ($handlers as $handler)
                 {
                     if (!isset($handler['permission']) || !valid($handler['permission']))
