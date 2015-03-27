@@ -1,0 +1,25 @@
+<section id="roles-management">
+    <h2>Roles Listing</h2>
+    <hr />
+    <section id="content-wrapper" class="col-sm-12">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="Role in Display.roles">
+                    <td>{{Role.rid}}</td>
+                    <td>{{Role.title}}</td>
+                    <td>{{Role.description}}</td>
+                    <td>
+                        <a class="btn btn-info" href="#rbac/role/{{Role.rid}}/edit">edit</a> </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</section>
