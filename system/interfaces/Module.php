@@ -10,6 +10,18 @@
      */
     interface Module
     {
+        
+        /**
+         * This is a method that is called at the initial page load
+         * 
+         * This method is good for allowing a module to load it's custom scripts or css files
+         * 
+         * @note This method is not executed when an API call is made
+         * 
+         * @author Joshua Kissoon
+         * @since 20150330
+         */
+        public function bootup();
 
         /**
          * @return String - The unique name for this module

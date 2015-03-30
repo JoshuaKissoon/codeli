@@ -12,6 +12,13 @@
         private $name = "User Management";
         private $description = "Module that handles all User Management";
 
+        public function bootup()
+        {
+            $theme = Codeli::getInstance()->getThemeRegistry();
+            
+            $theme->addCss("SomeCss.css");
+        }
+        
         public function getDescription()
         {
             return $this->description;

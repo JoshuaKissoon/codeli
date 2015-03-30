@@ -23,6 +23,22 @@
          * 
          * With no urlq variable set, the $url will be set to /home
          */
+        /* First we need to bootup all modules */
+        $modules = JModuleManager::getActiveModules();
+        foreach ($modules as $module)
+        {
+            $guid = $module->getId();
+            $modtype = $module->getType();
+            
+            include_once JModuleManager::getModule($guid);
+
+            $classname = ModuleHelper::getModuleClassName($guid);
+            
+            require_once SystemConfig::basePath() . "$modtype/modules/$guid/$classname.php";
+            $mod = new $classname;
+            $mod->bootup();
+        }
+
         Codeli::getInstance()->getThemeRegistry()->renderPage();
     }
     else
