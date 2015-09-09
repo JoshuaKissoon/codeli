@@ -358,7 +358,7 @@
             {
                 $sql = "INSERT INTO " . SystemTables::USER_ROLE . " (uid, rid) VALUES ('::uid', '::rid')";
                 $args = array('::rid' => $rid, '::uid' => $this->uid);
-                $db->query($sql, $args, true);
+                $db->query($sql, $args);
             }
 
             return true;

@@ -29,11 +29,11 @@
         {
             $guid = $module->getId();
             $modtype = $module->getType();
-            
+
             include_once JModuleManager::getModule($guid);
 
             $classname = ModuleHelper::getModuleClassName($guid);
-            
+
             require_once SystemConfig::basePath() . "$modtype/modules/$guid/$classname.php";
             $mod = new $classname;
             $mod->bootup();
