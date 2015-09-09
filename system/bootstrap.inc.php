@@ -67,7 +67,6 @@
 
     /* Load System Files & Classes */
     require_once SystemConfig::includesPath() . 'functions.inc.php';
-    require_once SiteConfig::themePath() . 'Theme.php';
 
     /* Get an instance of the Sweia object */
     $codeli = Codeli::getInstance();

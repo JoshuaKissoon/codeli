@@ -2,91 +2,71 @@
 
     /*
      * This is the website index page that handles all requests throughout the site
+     * 
+     * @author Joshua Kissoon
+     * @since 2014
      */
     error_reporting(E_ALL | E_WARNING | E_NOTICE);
     ini_set('display_errors', TRUE);
 
-    /**
-     * Lets bootstrap the system
-     */
+    /* Bootstrap the system */
     require_once 'system/bootstrap.inc.php';
 
+    function default_exception_handler(Exception $e)
+    {
+        // show something to the user letting them know we fell down
+        echo "<h2>Something Bad Happened</h2>";
+        echo "<p>We fill find the person responsible and have them shot</p>";
+        // do some logging for the exception and call the kill_programmer function.
+    }
+
+    set_exception_handler("default_exception_handler");
 
     $url = Codeli::getInstance()->getURL();
 
-    if (BaseConfig::HOME_URL == trim($url[0]))
+    /* Hanle invalid routes */
+    try
     {
-        /**
-         * Render the basic theme if it's not an api call
-         * 
-         * This will work for all angular URLs since AngularJS URLs have no urlq variable set
-         * 
-         * With no urlq variable set, the $url will be set to /home
-         */
-        /* First we need to bootup all modules */
-        $modules = JModuleManager::getActiveModules();
-        foreach ($modules as $module)
-        {
-            $guid = $module->getId();
-            $modtype = $module->getType();
-
-            include_once JModuleManager::getModule($guid);
-
-            $classname = ModuleHelper::getModuleClassName($guid);
-
-            require_once SystemConfig::basePath() . "$modtype/modules/$guid/$classname.php";
-            $mod = new $classname;
-            $mod->bootup();
-        }
-
-        Codeli::getInstance()->getThemeRegistry()->renderPage();
+        $handler = JPath::getRouteHandler();
     }
-    else
+    catch (InvalidRouteException $e)
     {
-        /**
-         * @section Load the modules for this url 
-         */
-        try
-        {
-            $handler = JPath::getRoute();
-        }
-        catch (InvalidRouteException $ex)
-        {
-            $response = new APIResponse("", "System Error Occured", false);
-            print $response->getJSONOutput();
-            exit;
-        }
+        print "got here";
+        $response = new APIResponse("", "System Error Occured", false, APIResponse::STATUS_CODE_INVALID_URL);
+        $response->output();
+        exit;
+    }
 
-        /* Check if the user can access this path */
-        $user = Codeli::getInstance()->getUser();
-        $access = false;
+    /* Check if the user can access this path */
+    $user = Codeli::getInstance()->getUser();
+    $access = false;
 
-        /* There is no permission for this module at the current URL, just load it */
-        if (null == $handler->getPermissionId() || "" == $handler->getPermissionId() || "0" == $handler->getPermissionId())
-        {
-            $access = true;
-        }
-        else if ($user->hasPermission($handler->getPermissionId()))
-        {
-            $access = true;
-        }
+    /* There is no permission for this module at the current URL, just load it */
+    if (null == $handler->getPermissionId() || "" == $handler->getPermissionId() || "0" == $handler->getPermissionId())
+    {
+        $access = true;
+    }
+    else if ($user->hasPermission($handler->getPermissionId()))
+    {
+        $access = true;
+    }
 
-        if (false == $access)
-        {
-            $response = new APIResponse("", "No permission access.", false);
-            print $response->getJSONOutput();
-            exit;
-        }
-
-        /* User has full access, lets load all active modules */
-        $modules = JModuleManager::getActiveModules();
-        foreach ($modules as $module)
-        {
-            include_once JModuleManager::getModule($module->getId());
-        }
-
-        $response = call_user_func($handler->getCallback());
+    if (false == $access)
+    {
+        $response = new APIResponse("", "No permission access.", false);
         print $response->getJSONOutput();
         exit;
     }
+
+    /* User has full access, lets load all active modules */
+    $modules = JModuleManager::getActiveModules();
+    foreach ($modules as $module)
+    {
+        include_once JModuleManager::getModule($module->getId());
+    }
+
+    $response = call_user_func($handler->getCallback());
+    print $response->getJSONOutput();
+    exit;
+
     

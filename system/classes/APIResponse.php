@@ -11,6 +11,7 @@
 
         const STATUS_CODE_SUCCESS = 200;
         const STATUS_CODE_ERROR = 200;
+        const STATUS_CODE_INVALID_URL = 404;
 
         private $status;
         private $success;
@@ -55,6 +56,12 @@
             );
 
             return json_encode($result);
+        }
+
+        public function output()
+        {
+            http_response_code($this->status);
+            print $this->getJSONOutput();
         }
 
     }

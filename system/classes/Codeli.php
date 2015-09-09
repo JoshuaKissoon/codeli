@@ -15,8 +15,6 @@
         /* Database Object */
         private $DB;
         private $URL;
-        private $themeRegistry;
-        private $theme;
         private $user = null;
 
         /**
@@ -26,8 +24,6 @@
         {
             $this->DB = new SQLiDatabase();
             $this->URL = JPath::urlArgs();
-            $this->themeRegistry = new ThemeRegistry();
-            $this->theme = new Theme();
         }
 
         /**
@@ -48,7 +44,6 @@
          */
         public function bootstrap()
         {
-            $this->theme->init();          // Initialize the theme
             Session::init();        // Initialize the session
         }
 
@@ -69,15 +64,7 @@
         {
             return $this->URL;
         }
-
-        /**
-         * @return ThemeRegistry - The Theme Registry
-         */
-        public function getThemeRegistry()
-        {
-            return $this->themeRegistry;
-        }
-
+        
         /**
          * Method used to set the global user object
          */

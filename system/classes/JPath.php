@@ -86,7 +86,7 @@
          * 
          * @throws InvalidRouteException
          */
-        public static function getRoute($url = null)
+        public static function getRouteHandler($url = null)
         {
             if (!valid($url))
             {
@@ -176,7 +176,7 @@
                 /* Remove this URL from the menu */
                 unset($menu[$url]);
 
-                $handlers = JPath::getRoute($url);
+                $handlers = JPath::getRouteHandler($url);
                 foreach ($handlers as $handler)
                 {
                     if (!isset($handler['permission']) || !valid($handler['permission']))

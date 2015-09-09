@@ -2,3 +2,7 @@ Codeli
 =============
 
 Codeli is a PHP REST framework focused on working only with a REST API system
+
+Status Codes
+------------
+Codeli uses status codes as defined by the IETF in the following document: http://www.ietf.org/assignments/http-status-codes/http-status-codes.xml
