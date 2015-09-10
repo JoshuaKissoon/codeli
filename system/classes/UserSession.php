@@ -14,8 +14,8 @@
         private $uid;
         private $token;
         private $ipAddress;
-        private $ussid;
-        private $data;
+        private $ussid = 1;
+        private $data = array();
         private $createdTimestamp;
 
         public function __construct($usid = null)
