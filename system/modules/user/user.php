@@ -20,7 +20,8 @@
 
         if (!$user->insert())
         {
-            SystemLogger::log(Codeli::getInstance()->getUser()->getId(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Failure", "", $user->expose());
+            $al = new ActivityLog(Codeli::getInstance()->getUser()->getId(), SystemLogger::OBJECT_USER, "", SystemLogger::ACTION_INSERT, "Failure", "", $user->expose());
+            SystemLogger::log($al);
             return new APIResponse("", "User addition failed.", false);
         }
 
@@ -36,7 +37,8 @@
             }
         }
 
-        SystemLogger::log(Codeli::getInstance()->getUser()->getId(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Success", "", $user->expose());
+        $al = new ActivityLog(Codeli::getInstance()->getUser()->getId(), SystemLogger::OBJECT_USER, $user->getId(), SystemLogger::ACTION_INSERT, "Success", "", $user->expose());
+        SystemLogger::log($al);
         return new APIResponse($user->expose(), "Successfully added new user.", true);
     }
 
@@ -63,7 +65,8 @@
 
         if (!$user->update())
         {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Failure", $original, $user->expose());
+            $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, $user->getId(), SystemLogger::ACTION_UPDATE, "Failure", $original, $user->expose());
+            SystemLogger::log($al);
             return new APIResponse("", "User updation failed.", false);
         }
 
@@ -79,7 +82,8 @@
             }
         }
 
-        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Success", $original, $user->expose());
+        $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, $user->getId(), SystemLogger::ACTION_UPDATE, "Success", $original, $user->expose());
+        SystemLogger::log($al);
         return new APIResponse($user->expose(), "Successfully updated user.", true);
     }
 
@@ -101,7 +105,8 @@
             $users[] = $user->expose();
         }
 
-        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_VIEW, "Success");
+        $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, "", SystemLogger::ACTION_VIEW, "Success");
+        SystemLogger::log($al);
 
         return new APIResponse($users);
     }
@@ -122,7 +127,8 @@
 
         $user = new JUser($uid);
 
-        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_VIEW, "Success");
+        $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, $user->getId(), SystemLogger::ACTION_VIEW, "Success");
+        SystemLogger::log($al);
 
         return new APIResponse($user->expose());
     }

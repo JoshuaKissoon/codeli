@@ -87,12 +87,14 @@
         $role->setDescription($data->description);
         if ($role->update())
         {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_UPDATE, "Success", $original_object, $role->expose());
+            $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $role->getId(), SystemLogger::ACTION_UPDATE, "Success", $original_object, $role->expose());
+            SystemLogger::log($al);
             return new APIResponse($role->expose(), "Successfully updated the Role.", true);
         }
         else
         {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_UPDATE, "Failure", $original_object, $role->expose());
+            $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $role->getId(), SystemLogger::ACTION_UPDATE, "Failure", $original_object, $role->expose());
+            SystemLogger::log($al);
             return new APIResponse("", "Role updation failed.", false);
         }
     }
