@@ -66,9 +66,8 @@
             $routes[] = new RouteInfo("admin/user", "user_edit_user", "user_user_edit", HTTP::METHOD_POST);
             $routes[] = new RouteInfo("admin/user/all", "user_get_users", "user_user_view", HTTP::METHOD_POST);
             $routes[] = new RouteInfo("admin/user/%", "user_get_user", "user_user_view", HTTP::METHOD_GET);
-            $routes[] = new RouteInfo("admin/user/login", "user_login_user", "", HTTP::METHOD_POST);
-            $routes[] = new RouteInfo("admin/user/session", "user_get_session", "", HTTP::METHOD_GET);
-            $routes[] = new RouteInfo("admin/user/logout", "user_logout_user", "", HTTP::METHOD_POST);
+            $routes[] = new RouteInfo("admin/user/login", "user_user_login", "", HTTP::METHOD_POST);
+            $routes[] = new RouteInfo("admin/user/logout", "user_user_logout", "", HTTP::METHOD_POST);
 
             /**
              * RBAC Routes

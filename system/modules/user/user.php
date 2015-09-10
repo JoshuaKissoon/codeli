@@ -39,7 +39,7 @@
     }
 
     /**
-     * Function that adds a new user to te system
+     * Edit a user account
      */
     function user_edit_user()
     {
@@ -80,7 +80,7 @@
     }
 
     /**
-     * Function that retrieves all users from the database
+     * Retrieves all users from the database
      */
     function user_get_users()
     {
@@ -104,7 +104,7 @@
     }
 
     /**
-     * Function that retrieves all users from the database
+     * Retrieves a single user
      */
     function user_get_user()
     {
@@ -125,7 +125,10 @@
         return new APIResponse($user->expose());
     }
 
-    function user_login_user()
+    /**
+     * Logs in a user to the API
+     */
+    function user_user_login()
     {
         $data = json_decode(file_get_contents("php://input"));
 
@@ -150,7 +153,10 @@
         return new APIResponse("", "Successfully logged in.", true);
     }
 
-    function user_logout_user()
+    /**
+     * Logs out a user from the API
+     */
+    function user_user_logout()
     {
         Logger::log(Session::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_LOGOUT, "Success");
 
