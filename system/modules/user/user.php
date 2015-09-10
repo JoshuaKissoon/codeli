@@ -45,11 +45,11 @@
     {
         $data = json_decode(file_get_contents("php://input"));
 
-        if(!JUser::isExistent($data->uid))
+        if (!JUser::isExistent($data->uid))
         {
             return new APIResponse("", "Invalid User Data", "");
         }
-        
+
         $user = new JUser($data->uid);
         $original = $user->expose();
         $user->setUserId($data->userId);
@@ -58,7 +58,7 @@
         $user->setFirstName($data->firstName);
         $user->setLastName($data->lastName);
         $user->setOtherName($data->otherName);
-        
+
         foreach ($data->roles as $rid => $has_role)
         {
             if ($has_role)
@@ -123,21 +123,6 @@
         Logger::log(Session::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_VIEW, "Success");
 
         return new APIResponse($user->expose());
-    }
-
-    function user_get_session()
-    {
-        $response = "";
-        if (Session::isLoggedIn())
-        {
-            $response = new APIResponse(array("logged_in" => true, "user" => Codeli::getInstance()->getUser()->expose()));
-        }
-        else
-        {
-            $response = new APIResponse(array("logged_in" => false));
-        }
-
-        return $response;
     }
 
     function user_login_user()
