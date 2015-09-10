@@ -92,16 +92,18 @@
             {
                 $url = self::getUrlQ();
             }
+            
+            $clean_url = ltrim(rtrim($url, "/"), "/");
 
             /* Try to get a handler for the main URL */
-            $res = JPath::getHandler($url, JPath::requestMethod());
+            $res = JPath::getHandler($clean_url, JPath::requestMethod());
+            
             if ($res)
             {
                 return $res;
             }
 
             /* Lets generate the possible route->urls that can be called for this path */
-            $clean_url = ltrim(rtrim($url, "/"), "/");
             $url_parts = explode("/", $clean_url);
 
             $sublength = count($url_parts) - 1;

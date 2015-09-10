@@ -144,5 +144,14 @@
             
         }
 
+        /**
+         * Method that returns an exposed version of the class's data
+         */
+        public function expose()
+        {
+            $object = get_object_vars($this);
+            return $object;
+        }
+
     }
     

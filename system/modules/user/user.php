@@ -154,8 +154,13 @@
         }
 
         /* Everything is good */
-        SessionManager::loginUser($user->getId());
-        return new APIResponse("", "Successfully logged in.", true);
+        $user->load();
+        $token = SessionManager::loginUser($user->getId());
+        $ret = array(
+            "user" => $user->expose(),
+            "token" => $token
+        );
+        return new APIResponse(json_encode($ret), "Successfully logged in.", true);
     }
 
     /**

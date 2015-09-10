@@ -43,6 +43,8 @@
          * Creates a new session and logs in a user
          * 
          * @param User The user to log in
+         * 
+         * @return {String} The token
          */
         public static function loginUser($uid)
         {
@@ -52,7 +54,9 @@
             $us->setUserId($uid);
             $us->setIpAddress($_SERVER['REMOTE_ADDR']);
             $us->setToken(session_id());
-            return $us->insert();
+            $us->insert();
+            
+            return session_id();
         }
 
         /**

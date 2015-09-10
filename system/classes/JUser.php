@@ -297,7 +297,7 @@
             $object = get_object_vars($this);
             $object['roles'] = array();
 
-            foreach ($this->roles as $role)
+            foreach ($this->getUserHelper()->getRoles() as $role)
             {
                 $object['roles'][$role->getId()] = $role->expose();
             }
