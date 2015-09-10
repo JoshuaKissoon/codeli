@@ -12,6 +12,7 @@
         const STATUS_CODE_SUCCESS = 200;
         const STATUS_CODE_ERROR = 200;
         const STATUS_CODE_INVALID_URL = 404;
+        const STATUS_SYSTEM_ERROR = 500;
 
         private $status;
         private $success;

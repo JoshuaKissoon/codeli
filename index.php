@@ -12,14 +12,6 @@
     /* Bootstrap the system */
     require_once 'system/bootstrap.inc.php';
 
-    function default_exception_handler(Exception $e)
-    {
-        // show something to the user letting them know we fell down
-        echo "<h2>Something Bad Happened</h2>";
-        echo "<p>We fill find the person responsible and have them shot</p>";
-        // do some logging for the exception and call the kill_programmer function.
-    }
-
     set_exception_handler("default_exception_handler");
 
     $url = Codeli::getInstance()->getURL();
@@ -31,8 +23,7 @@
     }
     catch (InvalidRouteException $e)
     {
-        print "got here";
-        $response = new APIResponse("", "System Error Occured", false, APIResponse::STATUS_CODE_INVALID_URL);
+        $response = new APIResponse("", "No URL Handler", false, APIResponse::STATUS_CODE_INVALID_URL);
         $response->output();
         exit;
     }
@@ -69,4 +60,9 @@
     print $response->getJSONOutput();
     exit;
 
+    function default_exception_handler(Exception $e)
+    {
+        $response = new APIResponse("", "System Error Occured", false, APIResponse::STATUS_SYSTEM_ERROR);
+        $response->output();
+    }
     
