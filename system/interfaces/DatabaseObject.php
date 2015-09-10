@@ -22,13 +22,6 @@
         public function getId();
 
         /**
-         * Checks whether the data in the object contains at least the minimum mandatory data required
-         * 
-         * @return Boolean Whether this object has the mandatory data or not
-         */
-        public function hasMandatoryData();
-
-        /**
          * Inserts a new row into the database with the data from this object
          * 
          * @return Boolean Whether the operation was successful

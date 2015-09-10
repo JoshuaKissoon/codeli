@@ -10,7 +10,7 @@
     {
 
         /**
-         * @desc Method that returns the username used to identify this user
+         * Method that returns the user's email
          */
         public function getEmail();
     }

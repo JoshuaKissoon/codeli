@@ -92,23 +92,11 @@
             $this->otherName = $oname;
         }
 
-        /**
-         * Grabs the user's status from the database
-         * 
-         * @return String - The user's current status
-         */
         public function getStatusId()
         {
             return $this->usid;
         }
 
-        /**
-         * Update this user's status
-         * 
-         * @param $usid The status id of the user's new status
-         * 
-         * @return Boolean - Whether the operation was successful
-         */
         public function setStatusId($usid)
         {
             $this->usid = $usid;
@@ -220,14 +208,13 @@
                 ":email" => isset($this->email) ? $this->email : "",
                 ":lastName" => isset($this->lastName) ? $this->lastName : "",
                 ":otherName" => isset($this->otherName) ? $this->otherName : "",
-                ":dob" => isset($this->dob) ? $this->dob : "",
                 ":password" => $this->password,
                 ":usid" => $this->usid,
             );
 
             $sql = "INSERT INTO " . SystemTables::USER .
-                    " (password, userid, email, firstName, lastName, otherName, dob, usid)
-                VALUES(':password', ':userid', ':email', ':firstName', ':lastName', ':otherName', ':dob', ':usid')";
+                    " (password, userid, email, firstName, lastName, otherName, usid)
+                VALUES(':password', ':userid', ':email', ':firstName', ':lastName', ':otherName', ':usid')";
 
             $res = $db->query($sql, $args);
 
@@ -251,7 +238,6 @@
                 ":email" => isset($this->email) ? $this->email : "",
                 ":lastName" => isset($this->lastName) ? $this->lastName : "",
                 ":otherName" => isset($this->otherName) ? $this->otherName : "",
-                ":dob" => isset($this->dob) ? $this->dob : "",
                 ":password" => $this->password,
                 ":usid" => $this->usid,
                 ":uid" => $this->uid,
@@ -259,7 +245,7 @@
 
             $sql = "UPDATE " . SystemTables::USER .
                     " SET password=':password', userid=':userid', email=':email', firstName=':firstName', 
-                        lastName=':lastName', otherName=':otherName', dob=':dob', usid=':usid' WHERE uid=:uid LIMIT 1";
+                        lastName=':lastName', otherName=':otherName', usid=':usid' WHERE uid=:uid LIMIT 1";
 
             $res = $db->query($sql, $args);
 
