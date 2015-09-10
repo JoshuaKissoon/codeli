@@ -22,15 +22,13 @@
         {
             $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $obj->getId(), SystemLogger::ACTION_INSERT, "Success", "", $obj->expose());
             SystemLogger::log($al);
-            $response = new APIResponse($obj->expose(), "Successfully added a new Role.", true);
-            $response->output();
+            return new APIResponse($obj->expose(), "Successfully added a new Role.", true);
         }
         else
         {
             $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $obj->getId(), SystemLogger::ACTION_INSERT, "Failure", "", $obj->expose());
             SystemLogger::log($al);
-            $response = new APIResponse("", "Role addition failed.", false);
-            $response->output();
+            return new APIResponse("", "Role addition failed.", false);
         }
     }
 

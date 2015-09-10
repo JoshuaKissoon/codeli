@@ -144,14 +144,12 @@
 
         if (!$authenticated)
         {
-            $response = new APIResponse("", "Invalid user id and/or password", false);
-            $response->output();
+            return new APIResponse("", "Invalid user id and/or password", false);
         }
 
         /* Everything is good */
         SessionManager::loginUser($user->getId());
-        $response = new APIResponse("", "Successfully logged in.", true);
-        $response->output();
+        return new APIResponse("", "Successfully logged in.", true);
     }
 
     /**
@@ -161,7 +159,6 @@
     {
         $success = SessionManager::logoutUser();
 
-        $response = new APIResponse("", "User Logout. ", $success);
-        $response->output();
+        return new APIResponse("", "User Logout. ", $success);
     }
     

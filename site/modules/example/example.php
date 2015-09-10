@@ -10,9 +10,7 @@
         $data = json_decode(file_get_contents("php://input"));
 
         $number = new ExampleNumber(10, "Ten");
-        $response = new APIResponse((string) $number, "Number added", true);
-
-        $response->output();
+        return new APIResponse((string) $number, "Number added", true);
     }
 
     function example_numbers_view()
@@ -26,9 +24,7 @@
             (string) new ExampleNumber(19, "Nineteen"),
         );
 
-        $response = new APIResponse($numbers, "View all numbers", true);
-
-        $response->output();
+        return new APIResponse($numbers, "View all numbers", true);
     }
 
     function example_number_view()
@@ -38,9 +34,7 @@
 
         /* Retrieve the number from the database if needed using the ID */
         $number = new ExampleNumber($numberId, "Number Name");
-        $response = new APIResponse((string) $number, "Number Gotten", true);
-
-        $response->output();
+        return new APIResponse((string) $number, "Number Gotten", true);
     }
 
     function example_number_edit()

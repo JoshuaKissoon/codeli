@@ -33,11 +33,8 @@
     $access = false;
 
     /* There is no permission for this module at the current URL, just load it */
-    if (null == $handler->getPermissionId() || "" == $handler->getPermissionId() || "0" == $handler->getPermissionId())
-    {
-        $access = true;
-    }
-    else if ($user->hasPermission($handler->getPermissionId()))
+    if (null == $handler->getPermissionId() || "" == $handler->getPermissionId() ||
+            "0" == $handler->getPermissionId() || $user->hasPermission($handler->getPermissionId()))
     {
         $access = true;
     }
@@ -45,7 +42,7 @@
     if (false == $access)
     {
         $response = new APIResponse("", "No permission access.", false);
-        print $response->getJSONOutput();
+        $response->output();
         exit;
     }
 
@@ -56,7 +53,8 @@
         include_once JModuleManager::getModule($module->getId());
     }
 
-    call_user_func($handler->getCallback());
+    $response = call_user_func($handler->getCallback());
+    $response->output();
     exit;
 
     function default_exception_handler(Exception $e)
