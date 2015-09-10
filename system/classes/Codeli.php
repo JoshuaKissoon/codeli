@@ -44,7 +44,7 @@
          */
         public function bootstrap()
         {
-            Session::init();        // Initialize the session
+            SessionManager::init();        // Initialize the session
         }
 
         /**
@@ -80,7 +80,7 @@
         {
             if(null == $this->user)
             {
-                $this->user = new JUser(Session::loggedInUid());
+                $this->user = new JUser(SessionManager::loggedInUid());
             }
             return $this->user;
         }
