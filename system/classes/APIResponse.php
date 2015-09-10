@@ -61,7 +61,9 @@
 
         public function output()
         {
+            header('Content-Type: application/json');
             http_response_code($this->status);
+            
             print $this->getJSONOutput();
         }
 

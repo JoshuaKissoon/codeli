@@ -56,8 +56,7 @@
         include_once JModuleManager::getModule($module->getId());
     }
 
-    $response = call_user_func($handler->getCallback());
-    print $response->getJSONOutput();
+    call_user_func($handler->getCallback());
     exit;
 
     function default_exception_handler(Exception $e)

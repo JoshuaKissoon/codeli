@@ -58,13 +58,13 @@
             $routes[] = new RouteInfo("example/numbers", "example_number_add", "example_number_add", HTTP::METHOD_PUT);
 
             /* We use post for this callback as to allow filtering information to be sent */
-            $routes[] = new RouteInfo("example/numbers", "example_numbers_view", "example_number_view", HTTP::METHOD_POST);
+            $routes[] = new RouteInfo("example/numbers", "example_numbers_view", "", HTTP::METHOD_POST);
 
-            /* Use GET to get a single number */
-            $routes[] = new RouteInfo("example/numbers/%", "example_number_view", "example_number_view", HTTP::METHOD_GET);
+            /* Use GET to get a single number, leave permission blank if anyone can view numbers */
+            $routes[] = new RouteInfo("example/numbers/%", "example_number_view", "", HTTP::METHOD_GET);
 
-            /* Use POST to update a number */
-            $routes[] = new RouteInfo("example/numbers", "example_number_edit", "example_number_edit", HTTP::METHOD_POST);
+            /* Use POST to update a single number */
+            $routes[] = new RouteInfo("example/numbers/%", "example_number_edit", "example_number_edit", HTTP::METHOD_POST);
 
             /* Use DELETE to delete a number */
             $routes[] = new RouteInfo("example/numbers/%", "example_number_delete", "example_number_delete", HTTP::METHOD_DELETE);

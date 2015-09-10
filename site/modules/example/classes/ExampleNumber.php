@@ -16,15 +16,13 @@
         {
             $this->number = $number;
             $this->title = $title;
+            
+            return $this;
         }
 
-        /**
-         * Method that returns an exposed version of the class's data
-         */
-        public function expose()
+        public function __toString()
         {
-            return get_object_vars($this);
+            return json_encode(get_object_vars($this));
         }
-
     }
     
