@@ -386,16 +386,6 @@
         }
 
         /**
-         * Checks whether this user works with the permission system
-         * 
-         * @return Boolean on whether the user uses the permission system or not
-         */
-        public function usesPermissionSystem()
-        {
-            return true;
-        }
-
-        /**
          * Load the permissions for this user from the database
          */
         public function loadPermissions()
