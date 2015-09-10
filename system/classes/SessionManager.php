@@ -16,12 +16,12 @@
          * 
          * @param User The user to log in
          */
-        public static function loginUser(User $user)
+        public static function loginUser($uid)
         {
             session_regenerate_id(true);
 
             $us = new UserSession();
-            $us->setUserId($user->getId());
+            $us->setUserId($uid);
             $us->setIpAddress($_SERVER['REMOTE_ADDR']);
             $us->setToken(session_id());
             return $us->insert();

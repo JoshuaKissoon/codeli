@@ -28,12 +28,12 @@
 
         if ($user->insert())
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_INSERT, "Success", "", $user->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Success", "", $user->expose());
             return new APIResponse($user->expose(), "Successfully added new user.", true);
         }
         else
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_INSERT, "Failure", "", $user->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Failure", "", $user->expose());
             return new APIResponse("", "User addition failed.", false);
         }
     }
@@ -69,12 +69,12 @@
 
         if ($user->update())
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_UPDATE, "Success", $original, $user->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Success", $original, $user->expose());
             return new APIResponse($user->expose(), "Successfully updated user.", true);
         }
         else
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_UPDATE, "Failure", $original, $user->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Failure", $original, $user->expose());
             return new APIResponse("", "User updation failed.", false);
         }
     }
@@ -98,7 +98,7 @@
             $users[] = $user->expose();
         }
 
-        Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_VIEW, "Success");
+        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_VIEW, "Success");
 
         return new APIResponse($users);
     }
@@ -120,13 +120,15 @@
         $user = new JUser($uid);
         $user->loadRoles();
 
-        Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_VIEW, "Success");
+        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_VIEW, "Success");
 
         return new APIResponse($user->expose());
     }
 
     /**
      * Logs in a user to the API
+     * 
+     * @todo Handle activity logging
      */
     function user_user_login()
     {
@@ -140,17 +142,14 @@
 
         if (!$authenticated)
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_LOGIN, "Failed");
-            return new APIResponse("", "Invalid user id and/or password", false);
+            $response = new APIResponse("", "Invalid user id and/or password", false);
+            $response->output();
         }
 
         /* Everything is good */
-        $user->load();
-        SessionManager::loginUser($user);
-
-        Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_LOGIN, "Success");
-
-        return new APIResponse("", "Successfully logged in.", true);
+        SessionManager::loginUser($user->getId());
+        $response = new APIResponse("", "Successfully logged in.", true);
+        $response->output();
     }
 
     /**
@@ -158,13 +157,9 @@
      */
     function user_user_logout()
     {
-        Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_USER, Logger::ACTION_LOGOUT, "Success");
-
         $success = SessionManager::logoutUser();
 
-        $response = new APIResponse();
-        $response->setSuccess($success);
-
-        return $response;
+        $response = new APIResponse("", "User Logout. ", $success);
+        $response->output();
     }
     

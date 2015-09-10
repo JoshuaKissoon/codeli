@@ -20,12 +20,12 @@
         $obj->setDescription($data->description);
         if ($obj->insert())
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_RBAC_ROLE, Logger::ACTION_INSERT, "Success", "", $obj->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_INSERT, "Success", "", $obj->expose());
             return new APIResponse($obj->expose(), "Successfully added a new Role.", true);
         }
         else
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_RBAC_ROLE, Logger::ACTION_INSERT, "Failure", "", $obj->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_INSERT, "Failure", "", $obj->expose());
             return new APIResponse("", "Role addition failed.", false);
         }
     }
@@ -42,7 +42,7 @@
         /* Seems to be valid data, lets get the role */
         $role = new Role($url[2]);
 
-        Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_RBAC_ROLE, Logger::ACTION_VIEW, "View Role with id " + $role->getId());
+        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_VIEW, "View Role with id " + $role->getId());
 
         return new APIResponse($role->expose());
     }
@@ -58,7 +58,7 @@
             $return[] = $ct->expose();
         }
 
-        Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_RBAC_ROLE, Logger::ACTION_VIEW, "View all Roles");
+        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_VIEW, "View all Roles");
 
         return new APIResponse($return);
     }
@@ -83,12 +83,12 @@
         $role->setDescription($data->description);
         if ($role->update())
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_RBAC_ROLE, Logger::ACTION_UPDATE, "Success", $original_object, $role->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_UPDATE, "Success", $original_object, $role->expose());
             return new APIResponse($role->expose(), "Successfully updated the Role.", true);
         }
         else
         {
-            Logger::log(SessionManager::loggedInUid(), Logger::OBJECT_RBAC_ROLE, Logger::ACTION_UPDATE, "Failure", $original_object, $role->expose());
+            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_UPDATE, "Failure", $original_object, $role->expose());
             return new APIResponse("", "Role updation failed.", false);
         }
     }
