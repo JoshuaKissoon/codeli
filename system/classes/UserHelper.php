@@ -8,6 +8,49 @@
     class UserHelper
     {
 
+        private $user;
+        private $roles = null;
+
+        public function __construct($user)
+        {
+            $this->user = $user;
+        }
+
+        /**
+         * @return Array - The roles this user have
+         */
+        public function getRoles()
+        {
+            if (null == $this->roles)
+            {
+                $this->loadRoles();
+            }
+            return $this->roles;
+        }
+
+        /**
+         * Loads the roles that a user have
+         * 
+         * @return Array - The set of user roles
+         */
+        public function loadRoles()
+        {
+            $db = Codeli::getInstance()->getDB();
+
+            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'";
+            $roles = $db->query($sql);
+            while ($row = $db->fetchObject($roles))
+            {
+                $role = new Role();
+                $role->loadFromMap($row);
+                $this->roles[$row->rid] = $role;
+            }
+
+            $this->isRolesLoaded = true;
+
+            return $this->roles;
+        }
+
         /**
          * Checks if an email address is in use 
          */

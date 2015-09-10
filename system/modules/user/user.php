@@ -18,24 +18,26 @@
         $user->setLastName($data->lastName);
         $user->setOtherName($data->otherName);
 
+        if (!$user->insert())
+        {
+            SystemLogger::log(Codeli::getInstance()->getUser()->getId(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Failure", "", $user->expose());
+            return new APIResponse("", "User addition failed.", false);
+        }
+
+        /* Lets add user Roles */
         foreach ($data->roles as $rid => $has_role)
         {
             if ($has_role)
             {
-                $user->addRole($rid);
+                $ur = new UserRole();
+                $ur->setRoleId($rid);
+                $ur->setUserId($user->getId());
+                $ur->insert();
             }
         }
 
-        if ($user->insert())
-        {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Success", "", $user->expose());
-            return new APIResponse($user->expose(), "Successfully added new user.", true);
-        }
-        else
-        {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Failure", "", $user->expose());
-            return new APIResponse("", "User addition failed.", false);
-        }
+        SystemLogger::log(Codeli::getInstance()->getUser()->getId(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_INSERT, "Success", "", $user->expose());
+        return new APIResponse($user->expose(), "Successfully added new user.", true);
     }
 
     /**
@@ -59,24 +61,26 @@
         $user->setLastName($data->lastName);
         $user->setOtherName($data->otherName);
 
-        foreach ($data->roles as $rid => $has_role)
-        {
-            if ($has_role)
-            {
-                $user->addRole($rid);
-            }
-        }
-
-        if ($user->update())
-        {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Success", $original, $user->expose());
-            return new APIResponse($user->expose(), "Successfully updated user.", true);
-        }
-        else
+        if (!$user->update())
         {
             SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Failure", $original, $user->expose());
             return new APIResponse("", "User updation failed.", false);
         }
+
+        /* Lets add user Roles */
+        foreach ($data->roles as $rid => $has_role)
+        {
+            if ($has_role)
+            {
+                $ur = new UserRole();
+                $ur->setRoleId($rid);
+                $ur->setUserId($user->getId());
+                $ur->insert();
+            }
+        }
+
+        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_UPDATE, "Success", $original, $user->expose());
+        return new APIResponse($user->expose(), "Successfully updated user.", true);
     }
 
     /**
@@ -94,7 +98,6 @@
         {
             $user = new JUser();
             $user->loadFromMap($res);
-            $user->loadRoles();
             $users[] = $user->expose();
         }
 
@@ -118,7 +121,6 @@
         }
 
         $user = new JUser($uid);
-        $user->loadRoles();
 
         SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_USER, SystemLogger::ACTION_VIEW, "Success");
 

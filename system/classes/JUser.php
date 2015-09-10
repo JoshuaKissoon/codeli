@@ -20,20 +20,11 @@
         private $status;
         private $email;
 
-        /**
-         * User Roles Management
-         */
-        private $isRolesLoaded = false;
-        private $roles = array();
-
-        /* Some constants of what data is loaded */
-        private $isPermissionsLoaded = false;
-        private $permissions = array();
-
-        /**
-         * Error handlers 
-         */
+        /* Error handlers */
         public static $ERROR_INCOMPLETE_DATA = 00001;
+
+        /* Support classes */
+        private $userHelper = null;
 
         /**
          * Constructor method for the user class, loads the user
@@ -176,14 +167,6 @@
         }
 
         /**
-         * @todo
-         */
-        public function hasMandatoryData()
-        {
-            
-        }
-
-        /**
          * Save the data of this user to the database, if it's a new user, then create this new user
          */
         public function save()
@@ -224,7 +207,6 @@
             }
 
             $this->uid = $db->lastInsertId();
-            $this->saveRoles();
             return true;
         }
 
@@ -247,14 +229,7 @@
                     " SET password=':password', userid=':userid', email=':email', firstName=':firstName', 
                         lastName=':lastName', otherName=':otherName', usid=':usid' WHERE uid=:uid LIMIT 1";
 
-            $res = $db->query($sql, $args);
-
-            if (!$res)
-            {
-                return false;
-            }
-
-            return $this->saveRoles();
+            return $db->query($sql, $args);
         }
 
         /**
@@ -302,135 +277,16 @@
         }
 
         /**
-         * Adds a new role to a user
-         * 
-         * @param $rid the id of the role to add
-         * 
-         * @return Boolean - Whether the operation was successful
+         * @return UserHelper The UserHelper class
          */
-        public function addRole($rid)
+        public function getUserHelper()
         {
-            $db = Codeli::getInstance()->getDB();
-
-            $res = $db->query("SELECT * FROM " . SystemTables::ROLE . " WHERE rid='::rid'", array('::rid' => $rid));
-
-            if ($db->resultNumRows($res) != 1)
+            if (null == $this->userHelper)
             {
-                return false;
+                $this->userHelper = new UserHelper($this);
             }
 
-            $this->roles[$rid] = new Role($rid);
-            return true;
-        }
-
-        /**
-         * Saves this user's roles to the Database
-         * 
-         * @return Boolean - Whether the operation was successful
-         */
-        public function saveRoles()
-        {
-            if (!self::isExistent($this->uid))
-            {
-                return false;
-            }
-
-            $db = Codeli::getInstance()->getDB();
-
-            /* Remove all the roles this user had */
-            $db->query("DELETE FROM " . SystemTables::USER_ROLE . " WHERE uid='$this->uid'");
-
-            foreach ($this->roles as $rid => $role)
-            {
-                $sql = "INSERT INTO " . SystemTables::USER_ROLE . " (uid, rid) VALUES ('::uid', '::rid')";
-                $args = array('::rid' => $rid, '::uid' => $this->uid);
-                $db->query($sql, $args);
-            }
-
-            return true;
-        }
-
-        /**
-         * Loads the roles that a user have
-         * 
-         * @return Array - The set of user roles
-         */
-        public function loadRoles()
-        {
-            $db = Codeli::getInstance()->getDB();
-
-            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'";
-            $roles = $db->query($sql);
-            while ($row = $db->fetchObject($roles))
-            {
-                $role = new Role();
-                $role->loadFromMap($row);
-                $this->roles[$row->rid] = $role;
-            }
-
-            $this->isRolesLoaded = true;
-
-            return $this->roles;
-        }
-
-        /**
-         * @return Array - The roles this user have
-         */
-        public function getRoles()
-        {
-            if (!$this->isRolesLoaded)
-            {
-                $this->loadRoles();
-            }
-            return $this->roles;
-        }
-
-        /**
-         * Load the permissions for this user from the database
-         */
-        public function loadPermissions()
-        {
-            if (count($this->getRoles()) < 1)
-            {
-                $this->permissions = array();
-                return;
-            }
-
-            $db = Codeli::getInstance()->getDB();
-
-            $rids = implode(", ", array_keys($this->getRoles()));
-            $rs = $db->query("SELECT permission FROM " . SystemTables::ROLE_PERMISSION . " WHERE rid IN ($rids)");
-
-            while ($perm = $db->fetchObject($rs))
-            {
-                $this->permissions[$perm->permission] = $perm->permission;
-            }
-        }
-
-        /**
-         * Check if the user has the specified permission
-         * 
-         * @param $permission The id of the permission to check if the user have
-         * 
-         * @return Boolean - Whether the user has the permission
-         */
-        public function hasPermission($permission)
-        {
-            if ($this->uid == 1)
-            {
-                return true;
-            }
-            if (!valid($permission))
-            {
-                return false;
-            }
-
-            if (!$this->isPermissionsLoaded)
-            {
-                $this->loadPermissions();
-            }
-
-            return (key_exists($permission, $this->permissions)) ? true : false;
+            return $this->userHelper;
         }
 
         /**
