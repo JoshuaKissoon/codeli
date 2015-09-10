@@ -10,6 +10,7 @@
 
         private $user;
         private $roles = null;
+        private $permissions = null;
 
         public function __construct($user)
         {
@@ -37,8 +38,9 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid='$this->uid'";
-            $roles = $db->query($sql);
+            $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE
+                    . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid=':uid'";
+            $roles = $db->query($sql, array(":uid" => $this->user->getId()));
             while ($row = $db->fetchObject($roles))
             {
                 $role = new Role();
@@ -46,9 +48,55 @@
                 $this->roles[$row->rid] = $role;
             }
 
-            $this->isRolesLoaded = true;
-
             return $this->roles;
+        }
+
+        /**
+         * Load the permissions for this user from the database
+         */
+        public function loadPermissions()
+        {
+            if (count($this->getRoles()) < 1)
+            {
+                $this->permissions = array();
+                return;
+            }
+
+            $db = Codeli::getInstance()->getDB();
+
+            $rids = implode(", ", array_keys($this->getRoles()));
+            $rs = $db->query("SELECT permission FROM " . SystemTables::ROLE_PERMISSION . " WHERE rid IN ($rids)");
+
+            while ($perm = $db->fetchObject($rs))
+            {
+                $this->permissions[$perm->permission] = $perm->permission;
+            }
+        }
+
+        /**
+         * Check if the user has the specified permission
+         * 
+         * @param $permission The id of the permission to check if the user have
+         * 
+         * @return Boolean - Whether the user has the permission
+         */
+        public function hasPermission($permission)
+        {
+            if ($this->user->getId() == 1)
+            {
+                return true;
+            }
+            if (!valid($permission))
+            {
+                return false;
+            }
+
+            if (null == $this->permissions)
+            {
+                $this->loadPermissions();
+            }
+
+            return (key_exists($permission, $this->permissions)) ? true : false;
         }
 
         /**

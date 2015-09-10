@@ -64,7 +64,7 @@
         {
             return $this->URL;
         }
-        
+
         /**
          * Method used to set the global user object
          */
@@ -74,11 +74,11 @@
         }
 
         /**
-         * @return User - The user object of the logged in system user
+         * @return JUser - The user object of the logged in system user
          */
         public function getUser()
         {
-            if(null == $this->user)
+            if (null == $this->user)
             {
                 $this->user = new JUser(SessionManager::loggedInUid());
             }

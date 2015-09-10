@@ -12,6 +12,34 @@
     {
 
         /**
+         * Initialize the session
+         */
+        public static function init()
+        {
+            SessionManager::loadDataFromToken();
+        }
+
+        /**
+         * Load the data of the currently logged in user from the token
+         */
+        public static function loadDataFromToken()
+        {
+            $headers = getallheaders();
+            $token = isset($headers['Authorization']) ? $headers['Authorization'] : "";
+            $_SESSION["user_session"] = UserSession::loadSessionFromToken($token);
+        }
+
+        public static function loggedInUid()
+        {
+            if (!$_SESSION['user_session'])
+            {
+                return false;
+            }
+
+            return $_SESSION['user_session']->getUserId();
+        }
+
+        /**
          * Creates a new session and logs in a user
          * 
          * @param User The user to log in

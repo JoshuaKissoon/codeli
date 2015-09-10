@@ -34,7 +34,7 @@
 
     /* There is no permission for this module at the current URL, just load it */
     if (null == $handler->getPermissionId() || "" == $handler->getPermissionId() ||
-            "0" == $handler->getPermissionId() || $user->hasPermission($handler->getPermissionId()))
+            "0" == $handler->getPermissionId() || $user->getUserHelper()->hasPermission($handler->getPermissionId()))
     {
         $access = true;
     }

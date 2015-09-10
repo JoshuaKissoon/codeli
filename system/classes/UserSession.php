@@ -29,6 +29,31 @@
             $this->load();
         }
 
+        /**
+         * Loads a user session from the given token 
+         * 
+         * @param String $token The token to load the session from 
+         * 
+         * @return UserSession 
+         */
+        public static function loadSessionFromToken($token)
+        {
+            $db = Codeli::getInstance()->getDB();
+
+            $args = array("::token" => $token);
+            $sql = "SELECT * FROM " . SystemTables::USER_SESSION . " WHERE token='::token' LIMIT 1";
+            $rs = $db->query($sql, $args);
+
+            if ($db->resultNumRows($rs) != 1)
+            {
+                return false;
+            }
+
+            $us = new UserSession();
+            $us->loadFromMap($db->fetchObject($rs));
+            return $us;
+        }
+
         public function getId()
         {
             return $this->usid;
@@ -37,6 +62,11 @@
         public function setUserId($uid)
         {
             $this->uid = $uid;
+        }
+
+        public function getUserId()
+        {
+            return $this->uid;
         }
 
         public function setToken($token)
