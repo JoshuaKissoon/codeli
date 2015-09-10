@@ -20,13 +20,17 @@
         $obj->setDescription($data->description);
         if ($obj->insert())
         {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_INSERT, "Success", "", $obj->expose());
-            return new APIResponse($obj->expose(), "Successfully added a new Role.", true);
+            $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $obj->getId(), SystemLogger::ACTION_INSERT, "Success", "", $obj->expose());
+            SystemLogger::log($al);
+            $response = new APIResponse($obj->expose(), "Successfully added a new Role.", true);
+            $response->output();
         }
         else
         {
-            SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_INSERT, "Failure", "", $obj->expose());
-            return new APIResponse("", "Role addition failed.", false);
+            $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $obj->getId(), SystemLogger::ACTION_INSERT, "Failure", "", $obj->expose());
+            SystemLogger::log($al);
+            $response = new APIResponse("", "Role addition failed.", false);
+            $response->output();
         }
     }
 
@@ -42,7 +46,8 @@
         /* Seems to be valid data, lets get the role */
         $role = new Role($url[2]);
 
-        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_VIEW, "View Role with id " + $role->getId());
+        $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, $role->getId(), SystemLogger::ACTION_VIEW);
+        SystemLogger::log($al);
 
         return new APIResponse($role->expose());
     }
@@ -58,7 +63,8 @@
             $return[] = $ct->expose();
         }
 
-        SystemLogger::log(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, SystemLogger::ACTION_VIEW, "View all Roles");
+        $al = new ActivityLog(SessionManager::loggedInUid(), SystemLogger::OBJECT_RBAC_ROLE, "", SystemLogger::ACTION_VIEW, "View all Roles");
+        SystemLogger::log($al);
 
         return new APIResponse($return);
     }

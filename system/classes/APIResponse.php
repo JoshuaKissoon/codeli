@@ -25,6 +25,8 @@
             $this->success = $success;
             $this->message = $message;
             $this->data = $data;
+            
+            return $this;
         }
 
         public function setStatus($status)
