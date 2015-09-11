@@ -36,6 +36,7 @@
          */
         public function loadRoles()
         {
+            $this->roles = array();
             $db = Codeli::getInstance()->getDB();
 
             $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE

@@ -1,0 +1,4 @@
+CREATE VIEW user_v AS
+SELECT u.*, CONCAT_WS(' ', u.firstName, u.otherName, u.lastName) AS fullName, us.title AS status
+FROM user u
+LEFT JOIN user_status us ON (us.usid = u.usid)

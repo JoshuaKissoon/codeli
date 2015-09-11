@@ -16,6 +16,7 @@
          */
         public static function init()
         {
+            session_start();
             SessionManager::loadDataFromToken();
         }
 
@@ -25,7 +26,7 @@
         public static function loadDataFromToken()
         {
             $headers = getallheaders();
-            $token = isset($headers['Authorization']) ? $headers['Authorization'] : "";
+            $token = isset($headers['AuthorizationToken']) ? $headers['AuthorizationToken'] : "";
             $_SESSION["user_session"] = UserSession::loadSessionFromToken($token);
         }
 
@@ -55,7 +56,6 @@
             $us->setIpAddress($_SERVER['REMOTE_ADDR']);
             $us->setToken(session_id());
             $us->insert();
-            
             return session_id();
         }
 

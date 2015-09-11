@@ -38,6 +38,11 @@
          */
         public static function loadSessionFromToken($token)
         {
+            if ("" == trim($token))
+            {
+                return false;
+            }
+            
             $db = Codeli::getInstance()->getDB();
 
             $args = array("::token" => $token);
@@ -93,8 +98,8 @@
         {
             $db = Codeli::getInstance()->getDB();
             $sql = "INSERT INTO " . SystemTables::USER_SESSION .
-                    " (uid, sid, ipaddress, status, data) "
-                    . " VALUES('::uid', '::sid', '::ipaddress', '::status', '::data')";
+                    " (uid, token, ipaddress, ussid, data) "
+                    . " VALUES('::uid', '::token', '::ipaddress', '::ussid', '::data')";
             $args = array(
                 "::uid" => $this->uid,
                 "::token" => $this->token,

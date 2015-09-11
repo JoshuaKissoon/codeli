@@ -156,10 +156,7 @@
         /* Everything is good */
         $user->load();
         $token = SessionManager::loginUser($user->getId());
-        $ret = array(
-            "user" => $user->expose(),
-            "token" => $token
-        );
+        $ret = array("token" => $token);
         return new APIResponse(json_encode($ret), "Successfully logged in.", true);
     }
 

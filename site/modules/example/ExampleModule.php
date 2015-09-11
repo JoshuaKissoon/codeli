@@ -58,7 +58,7 @@
             $routes[] = new RouteInfo("example/numbers", "example_number_add", "example_number_add", HTTP::METHOD_PUT);
 
             /* We use post for this callback as to allow filtering information to be sent */
-            $routes[] = new RouteInfo("example/numbers", "example_numbers_view", "", HTTP::METHOD_POST);
+            $routes[] = new RouteInfo("example/numbers", "example_numbers_view", "example_number_view", HTTP::METHOD_POST);
 
             /* Use GET to get a single number, leave permission blank if anyone can view numbers */
             $routes[] = new RouteInfo("example/numbers/%", "example_number_view", "", HTTP::METHOD_GET);
