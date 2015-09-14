@@ -26,7 +26,7 @@
         public static function loadDataFromToken()
         {
             $headers = getallheaders();
-            $token = isset($headers['AuthorizationToken']) ? $headers['AuthorizationToken'] : "";
+            $token = isset($headers['accessToken']) ? $headers['accessToken'] : "";
             $_SESSION["user_session"] = UserSession::loadSessionFromToken($token);
         }
 
