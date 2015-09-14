@@ -47,10 +47,15 @@
         public static function delete($id);
 
         /**
-         * Inserts a new row into the database with the data from this object
+         * Load the data from the database for this object
          * 
          * @return Boolean Whether the operation was successful
          */
         public function load();
+
+        /**
+         * Loads the data to populate this object from an objected
+         */
+        public function loadFromMap($data);
     }
     
