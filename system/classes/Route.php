@@ -153,5 +153,10 @@
             return $object;
         }
 
+        public function loadFromMap($data)
+        {
+            
+        }
+
     }
     

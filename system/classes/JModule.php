@@ -309,5 +309,10 @@
             return $db->query("DELETE FROM " . SystemTables::MODULE . " WHERE guid='::guid'", array("::guid" => $this->guid));
         }
 
+        public function loadFromMap($data)
+        {
+            
+        }
+
     }
     
