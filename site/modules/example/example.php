@@ -17,12 +17,15 @@
     {
         $filters = json_decode(file_get_contents("php://input"));
 
-        $numbers = array(
-            (string) new ExampleNumber(10, "Ten"),
-            (string) new ExampleNumber(13, "Thirteen"),
-            (string) new ExampleNumber(16, "Sixteen"),
-            (string) new ExampleNumber(19, "Nineteen"),
-        );
+        $numbers = array();
+        $ten = new ExampleNumber(10, "Ten");
+        $numbers[$ten->getId()] = $ten->toJson();
+        $thirteen = new ExampleNumber(13, "Thirteen");
+        $numbers[$thirteen->getId()] = $thirteen->toJson();
+        $sixteen = new ExampleNumber(16, "Sixteen");
+        $numbers[$sixteen->getId()] = $sixteen->toJson();
+        $nineteen = new ExampleNumber(19, "Nineteen");
+        $numbers[$nineteen->getId()] = $nineteen->toJson();
 
         return new APIResponse($numbers, "View all numbers", true);
     }
