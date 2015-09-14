@@ -295,6 +295,7 @@
         public function expose()
         {
             $object = get_object_vars($this);
+            $object["password"] = "guessme?";
             $object['roles'] = array();
 
             foreach ($this->getUserHelper()->getRoles() as $role)
