@@ -152,7 +152,7 @@
             $db = Codeli::getInstance()->getDB();
 
             /* Check if this is a valid permission */
-            $res = $db->fetchObject($db->query("SELECT permission FROM permission WHERE permission='::perm'", array("::perm" => $perm)));
+            $res = $db->fetchObject($db->query("SELECT " . SystemTables::PERMISSION . " FROM permission WHERE permission='::perm'", array("::perm" => $perm)));
             if (!valid($res->permission))
             {
                 return false;
