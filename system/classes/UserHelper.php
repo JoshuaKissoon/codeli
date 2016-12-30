@@ -40,7 +40,7 @@
             $db = Codeli::getInstance()->getDB();
 
             $sql = "SELECT ur.rid, r.* FROM " . SystemTables::USER_ROLE
-                    . " ur LEFT JOIN role r ON (r.rid = ur.rid) WHERE uid=':uid'";
+                    . " ur LEFT JOIN " . SystemTables::ROLE . " r ON (r.rid = ur.rid) WHERE uid=':uid'";
             $roles = $db->query($sql, array(":uid" => $this->user->getId()));
             while ($row = $db->fetchObject($roles))
             {
