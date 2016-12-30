@@ -26,7 +26,7 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $temp = $db->fetchObject($db->query("SELECT type FROM module WHERE guid = '::mod'", array("::mod" => $modname)));
+            $temp = $db->fetchObject($db->query("SELECT type FROM " . SystemTables::MODULE . " WHERE guid = '::mod'", array("::mod" => $modname)));
             if (isset($temp->type) && $temp->type == "system")
             {
                 return SystemConfig::modulesPath() . "$modname/";
@@ -46,7 +46,7 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $temp = $db->fetchObject($db->query("SELECT type FROM module WHERE guid = '::mod'", array("::mod" => $modname)));
+            $temp = $db->fetchObject($db->query("SELECT type FROM " . SystemTables::MODULE . " WHERE guid = '::mod'", array("::mod" => $modname)));
             if (isset($temp->type) && $temp->type == "system")
             {
                 $path = SystemConfig::modulesUrl() . "$modname/";

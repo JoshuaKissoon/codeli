@@ -83,7 +83,7 @@
                 $sweia = Codeli::getInstance();
                 $db = $sweia->getDB();
                 $this->permissions = array();
-                $perms = $db->query("SELECT * FROM " . SystemDatabaseTables::PERMISSION . " WHERE module='::modname'", array("::modname" => $this->name));
+                $perms = $db->query("SELECT * FROM " . SystemTables::PERMISSION . " WHERE module='::modname'", array("::modname" => $this->name));
                 while ($perm = $db->fetchObject($perms))
                 {
                     $this->permissions[$perm->permission] = $perm->title;
@@ -101,7 +101,7 @@
                 $sweia = Codeli::getInstance();
                 $db = $sweia->getDB();
                 $this->routes = array();
-                $urls = $db->query("SELECT * FROM url_handler WHERE module='::modname'", array("::modname" => $this->name));
+                $urls = $db->query("SELECT * FROM " . SystemTables::ROUTE . " WHERE module='::modname'", array("::modname" => $this->name));
                 while ($url = $db->fetchObject($urls))
                 {
                     $this->routes[$url->url] = $url;
@@ -140,7 +140,7 @@
         public static function isExistent($guid)
         {
             $db = Codeli::getInstance()->getDB();
-            $res = $db->fetchObject($db->query("SELECT guid FROM " . DatabaseTables::MODULE .
+            $res = $db->fetchObject($db->query("SELECT guid FROM " . SystemTables::MODULE .
                             " WHERE guid='::guid'", array("::guid" => $guid)));
 
             if (isset($res->guid))
@@ -155,7 +155,7 @@
         {
             $db = Codeli::getInstance()->getDB();
 
-            $mod = $db->fetchObject($db->query("SELECT * FROM module WHERE guid='::guid'", array("::guid" => $this->guid)));
+            $mod = $db->fetchObject($db->query("SELECT * FROM " . SystemTables::MODULE . " WHERE guid='::guid'", array("::guid" => $this->guid)));
             foreach ($mod as $key => $value)
             {
                 $this->$key = $value;
@@ -297,10 +297,10 @@
             $db = Codeli::getInstance()->getDB();
 
             /* Delete the Routes associated with this module */
-            $db->query("DELETE FROM route WHERE module='::guid'", array("::guid" => $this->guid));
+            $db->query("DELETE FROM " . SystemTables::ROUTE . " WHERE module='::guid'", array("::guid" => $this->guid));
 
             /* Delete the Permissions associated with this module */
-            $db->query("DELETE FROM permission WHERE module='::guid'", array("::guid" => $this->guid));
+            $db->query("DELETE FROM " . SystemTables::PERMISSION . " WHERE module='::guid'", array("::guid" => $this->guid));
 
             /* Delete the Module Dependencies associated with this module */
             $db->query("DELETE FROM " . SystemTables::MODULE_DEPENDENCY . " WHERE guid='::guid'", array("::guid" => $this->guid));
